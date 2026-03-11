@@ -48,11 +48,23 @@
     z-index: 9999; display: flex; align-items: center;
     background: #fff; border: 2px solid var(--blue);
     border-radius: 40px; box-shadow: 0 4px 16px rgba(0,0,0,.2);
-    overflow: hidden; padding: 4px;
+    padding: 3px; white-space: nowrap;
+    position: fixed;
   }
-  .toggle-btn { padding: 8px 28px; border-radius: 36px; border: none; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; font-weight: 700; transition: all .25s; background: transparent; color: #888; }
-  .toggle-btn.active { background: var(--blue); color: white; box-shadow: 0 2px 8px rgba(26,58,92,.4); }
-  .toggle-btn:not(.active):hover { background: #f0f4f8; color: var(--blue); }
+  .toggle-pill {
+    position: absolute;
+    height: calc(100% - 6px);
+    border-radius: 36px;
+    background: var(--blue);
+    box-shadow: 0 2px 8px rgba(26,58,92,.4);
+    transition: left .3s cubic-bezier(.34,1.2,.64,1), width .3s cubic-bezier(.34,1.2,.64,1);
+    pointer-events: none;
+    top: 3px;
+    z-index: 0;
+  }
+  .toggle-btn { padding: 5px 18px; border-radius: 36px; border: none; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12px; font-weight: 700; transition: color .25s; background: transparent; color: #888; white-space: nowrap; position: relative; z-index: 1; }
+  .toggle-btn.active { color: white; }
+  .toggle-btn:not(.active):hover { color: var(--blue); }
 
   .view { display: none; }
   .view.active { display: block; }
@@ -185,6 +197,11 @@
   .d1{animation-delay:.04s}.d2{animation-delay:.10s}.d3{animation-delay:.16s}
   .d4{animation-delay:.22s}.d5{animation-delay:.28s}.d6{animation-delay:.34s}
   .d7{animation-delay:.40s}.d8{animation-delay:.46s}.d9{animation-delay:.52s}
+
+  /* ── INFRA ANIMATIONS ── */
+  .infra-machine, .infra-anim, .p-local, .rag-pipeline, .query-flow, .storage-box, .out-row, .out-tag {
+    animation: pop .4s cubic-bezier(.34,1.56,.64,1) both;
+  }
 
   /* ── INFRA VIEW ── */
   :root {
@@ -717,28 +734,42 @@
 </div>
 
 <div class="toggle-ctrl" id="mainToggle" style="display:none">
+  <div class="toggle-pill" id="togglePill"></div>
   <button class="toggle-btn active" id="btn-capa" onclick="setView('capa')">✦</button>
   <button class="toggle-btn" id="btn-infra" onclick="setView('infra')">🖥️ Infraestrutura</button>
   <button class="toggle-btn" id="btn-tech" onclick="setView('tech')">🔄 Fluxo de Dados</button>
+  <button class="toggle-btn" id="btn-gerencial" onclick="setView('gerencial')">📋 Visão Gerencial</button>
   <button class="toggle-btn" id="btn-user" onclick="setView('user')">👤 Visão do Usuário</button>
 </div>
 
 <script>
   var z = 100;
   function adjustZoom(d) { z=Math.min(200,Math.max(30,z+d)); document.getElementById('zoomVal').textContent=z+'%'; document.body.style.zoom=z+'%'; }
+
+  function slidePill(btnEl) {
+    var pill = document.getElementById('togglePill');
+    var ctrl = document.getElementById('mainToggle');
+    if (!pill || !btnEl) return;
+    var ctrlRect = ctrl.getBoundingClientRect();
+    var btnRect  = btnEl.getBoundingClientRect();
+    pill.style.left  = (btnRect.left - ctrlRect.left) + 'px';
+    pill.style.width = btnRect.width + 'px';
+  }
+
   function setView(v) {
-    ['capa','tech','user','infra'].forEach(x => {
+    ['capa','tech','user','infra','gerencial'].forEach(x => {
       document.getElementById('view-'+x).classList.toggle('active', v===x);
       document.getElementById('btn-'+x).classList.toggle('active', v===x);
     });
     document.getElementById('mainToggle').style.display = (v === 'capa') ? 'none' : '';
+    slidePill(document.getElementById('btn-'+v));
   }
-  function setInfraView(v) {
-    ['tech','simple'].forEach(x => {
-      document.getElementById('infra-panel-'+x).classList.toggle('active', v===x);
-      document.getElementById('infra-btn-'+x).classList.toggle('active', v===x);
-    });
-  }
+
+  // Init pill on first real view
+  window.addEventListener('load', function() {
+    var active = document.querySelector('.toggle-btn.active');
+    if (active) slidePill(active);
+  });
 </script>
 
 <!-- ════════════════ COVER PAGE ════════════════ -->
@@ -1031,46 +1062,257 @@
     <div class="tline"></div>
   </div>
 
-  <!-- SUB-TOGGLE -->
-  <div class="infra-sub-toggle">
-    <div class="infra-sub-bar">
-      <button class="infra-sub-btn active" id="infra-btn-tech" onclick="setInfraView('tech')">⚙️ Versão Técnica</button>
-      <button class="infra-sub-btn" id="infra-btn-simple" onclick="setInfraView('simple')">💡 Versão Simplificada</button>
-    </div>
-  </div>
-
   <!-- ══════ PAINEL TÉCNICO ══════ -->
-  <div class="infra-panel active" id="infra-panel-tech">
 
-  <div class="p-local d1">
-    <div class="p-local-lbl">🟢 Perímetro local — tudo processado na própria máquina</div>
+  <!-- ══ DIAGRAMA DE REDE: Totem → Gemini ══ -->
+    <div class="infra-anim d1" style="margin-bottom:18px;background:linear-gradient(135deg,#f0f5ff,#e8f0fe);border:2px solid #c7d7f9;border-radius:14px;padding:18px 20px;position:relative;">
+      <div style="position:absolute;top:-11px;left:18px;background:var(--paper);padding:0 10px;font-family:'Plus Jakarta Sans',sans-serif;font-size:10px;font-weight:800;color:#1d4ed8;letter-spacing:.8px;text-transform:uppercase;">🌐 Diagrama de Rede — Fluxo de Requisição HTTP/S ao Gemini</div>
 
-    <!-- WiFi Banner -->
-    <div class="wifi-banner d1">
-      <div class="wifi-banner-icon">📶</div>
-      <div class="wifi-banner-body">
-        <div class="wifi-banner-title">Conectividade de Rede — WiFi Corporativo</div>
-        <div class="wifi-banner-desc">
-          O totem se conecta à internet exclusivamente via rede WiFi corporativa
-          <span class="wifi-ssid">Ceva-Corporate</span>.
-          Essa conexão é utilizada apenas para enviar as consultas ao Gemini (HTTPS saída).
-          Todo o processamento local — leitura de documentos, busca, autenticação — ocorre sem uso da rede.
+      <!-- Diagrama SVG + Cards de protocolo -->
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:nowrap;">
+
+        <!-- 1. COMPUTADOR TOTEM -->
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex-shrink:0;min-width:110px;">
+          <svg width="88" height="78" viewBox="0 0 88 78" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Monitor -->
+            <rect x="6" y="4" width="76" height="50" rx="5" fill="#1e3a8a" stroke="#1d4ed8" stroke-width="2"/>
+            <rect x="12" y="10" width="64" height="38" rx="3" fill="#dbeafe"/>
+            <!-- Tela: gráfico simplificado -->
+            <rect x="18" y="30" width="8" height="12" rx="1" fill="#2563eb"/>
+            <rect x="30" y="24" width="8" height="18" rx="1" fill="#3b82f6"/>
+            <rect x="42" y="20" width="8" height="22" rx="1" fill="#60a5fa"/>
+            <rect x="54" y="27" width="8" height="15" rx="1" fill="#2563eb"/>
+            <!-- Cursor piscando -->
+            <rect x="62" y="16" width="2" height="9" rx="1" fill="#1d4ed8" opacity="0.7"/>
+            <!-- Suporte -->
+            <rect x="38" y="54" width="12" height="7" rx="2" fill="#1e40af"/>
+            <rect x="28" y="61" width="32" height="5" rx="2.5" fill="#1e3a8a"/>
+            <!-- Teclado -->
+            <rect x="22" y="68" width="44" height="8" rx="3" fill="#1e40af" stroke="#3b82f6" stroke-width="1"/>
+            <rect x="26" y="70" width="6" height="4" rx="1" fill="#60a5fa" opacity="0.6"/>
+            <rect x="34" y="70" width="6" height="4" rx="1" fill="#60a5fa" opacity="0.6"/>
+            <rect x="42" y="70" width="6" height="4" rx="1" fill="#60a5fa" opacity="0.6"/>
+            <rect x="50" y="70" width="6" height="4" rx="1" fill="#60a5fa" opacity="0.6"/>
+          </svg>
+          <div style="text-align:center;">
+            <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:10px;font-weight:800;color:#1e3a8a;line-height:1.3;">🖥️ Totem</div>
+            <div style="font-size:9px;color:#475569;margin-top:2px;">Windows 10/11</div>
+            <div style="font-size:9px;color:#475569;">Python App</div>
+          </div>
+          <!-- Badge IP Privado -->
+          <div style="background:#1e3a8a;color:white;font-family:'Courier New',monospace;font-size:8px;font-weight:700;border-radius:6px;padding:3px 8px;text-align:center;letter-spacing:.5px;">IP PRIVADO<br/>192.168.x.x</div>
+        </div>
+
+        <!-- SETA 1: Totem → WiFi -->
+        <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;min-width:70px;">
+          <div style="font-size:8.5px;font-weight:800;color:#1d4ed8;font-family:'Plus Jakarta Sans',sans-serif;letter-spacing:.5px;white-space:nowrap;">📶 Ceva-Corporate</div>
+          <div style="position:relative;width:100%;display:flex;align-items:center;">
+            <div style="flex:1;height:2.5px;background:repeating-linear-gradient(to right,#2563eb 0,#2563eb 5px,transparent 5px,transparent 10px);"></div>
+            <div style="width:0;height:0;border-top:6px solid transparent;border-bottom:6px solid transparent;border-left:9px solid #2563eb;flex-shrink:0;"></div>
+          </div>
+          <div style="font-size:8px;color:#64748b;text-align:center;">WiFi 802.11ac/ax</div>
+          <!-- seta retorno -->
+          <div style="position:relative;width:100%;display:flex;align-items:center;margin-top:2px;">
+            <div style="width:0;height:0;border-top:5px solid transparent;border-bottom:5px solid transparent;border-right:8px solid #16a34a;flex-shrink:0;"></div>
+            <div style="flex:1;height:2px;background:repeating-linear-gradient(to left,#16a34a 0,#16a34a 5px,transparent 5px,transparent 10px);"></div>
+          </div>
+          <div style="font-size:8px;color:#16a34a;font-weight:700;text-align:center;">← Resposta JSON</div>
+        </div>
+
+        <!-- 2. ROTEADOR WiFi -->
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex-shrink:0;min-width:90px;">
+          <svg width="72" height="64" viewBox="0 0 72 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Ondas WiFi -->
+            <path d="M36 20 Q36 20 36 20" stroke="#0891b2" stroke-width="1.5"/>
+            <path d="M20 18 Q28 10 36 9 Q44 10 52 18" stroke="#0891b2" stroke-width="2" fill="none" stroke-linecap="round"/>
+            <path d="M25 23 Q30.5 16 36 15.5 Q41.5 16 47 23" stroke="#0891b2" stroke-width="2" fill="none" stroke-linecap="round"/>
+            <path d="M30 28 Q33 24 36 23.5 Q39 24 42 28" stroke="#0891b2" stroke-width="2" fill="none" stroke-linecap="round"/>
+            <circle cx="36" cy="32" r="3" fill="#0891b2"/>
+            <!-- Corpo roteador -->
+            <rect x="10" y="38" width="52" height="18" rx="5" fill="#0e7490" stroke="#0891b2" stroke-width="1.5"/>
+            <!-- LEDs -->
+            <circle cx="22" cy="47" r="2.5" fill="#22d3ee"/>
+            <circle cx="30" cy="47" r="2.5" fill="#22d3ee"/>
+            <circle cx="38" cy="47" r="2.5" fill="#4ade80"/>
+            <circle cx="46" cy="47" r="2.5" fill="#fbbf24"/>
+            <!-- Antenas -->
+            <rect x="15" y="26" width="3" height="14" rx="1.5" fill="#0e7490" stroke="#0891b2" stroke-width="1"/>
+            <rect x="54" y="26" width="3" height="14" rx="1.5" fill="#0e7490" stroke="#0891b2" stroke-width="1"/>
+          </svg>
+          <div style="text-align:center;">
+            <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:10px;font-weight:800;color:#0e7490;">Router WiFi</div>
+            <div style="font-size:9px;color:#475569;">Ceva-Corporate</div>
+          </div>
+          <div style="background:#0e7490;color:white;font-size:8px;font-weight:700;border-radius:6px;padding:3px 8px;text-align:center;font-family:'Courier New',monospace;">NAT / Firewall</div>
+        </div>
+
+        <!-- SETA 2: WiFi → Internet (com porta e protocolo) -->
+        <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;min-width:80px;">
+          <div style="background:#fff7ed;border:1.5px solid #fed7aa;border-radius:8px;padding:3px 8px;font-size:8px;font-weight:800;color:#c2410c;font-family:'Plus Jakarta Sans',sans-serif;text-align:center;white-space:nowrap;">
+            🔓 PORTA 443<br/>TCP SAÍDA
+          </div>
+          <div style="position:relative;width:100%;display:flex;align-items:center;">
+            <div style="flex:1;height:2.5px;background:repeating-linear-gradient(to right,#d97706 0,#d97706 5px,transparent 5px,transparent 10px);"></div>
+            <div style="width:0;height:0;border-top:6px solid transparent;border-bottom:6px solid transparent;border-left:9px solid #d97706;flex-shrink:0;"></div>
+          </div>
+          <div style="font-size:8px;color:#64748b;text-align:center;">HTTPS / TLS 1.3</div>
+          <!-- seta retorno -->
+          <div style="position:relative;width:100%;display:flex;align-items:center;margin-top:2px;">
+            <div style="width:0;height:0;border-top:5px solid transparent;border-bottom:5px solid transparent;border-right:8px solid #16a34a;flex-shrink:0;"></div>
+            <div style="flex:1;height:2px;background:repeating-linear-gradient(to left,#16a34a 0,#16a34a 5px,transparent 5px,transparent 10px);"></div>
+          </div>
+          <div style="font-size:8px;color:#16a34a;font-weight:700;text-align:center;">← Resposta JSON</div>
+        </div>
+
+        <!-- 3. INTERNET -->
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex-shrink:0;min-width:80px;">
+          <svg width="68" height="68" viewBox="0 0 68 68" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Círculo principal do globo -->
+            <circle cx="34" cy="34" r="30" fill="#dbeafe" stroke="#3b82f6" stroke-width="2"/>
+            <!-- Meridianos verticais (linhas de longitude) -->
+            <ellipse cx="34" cy="34" rx="30" ry="30" fill="none" stroke="#93c5fd" stroke-width="1"/>
+            <ellipse cx="34" cy="34" rx="15" ry="30" fill="none" stroke="#93c5fd" stroke-width="1"/>
+            <ellipse cx="34" cy="34" rx="5" ry="30" fill="none" stroke="#93c5fd" stroke-width="0.7" opacity="0.6"/>
+            <!-- Paralelos horizontais (linhas de latitude) -->
+            <ellipse cx="34" cy="34" rx="30" ry="10" fill="none" stroke="#93c5fd" stroke-width="1"/>
+            <ellipse cx="34" cy="22" rx="24" ry="7" fill="none" stroke="#93c5fd" stroke-width="1"/>
+            <ellipse cx="34" cy="46" rx="24" ry="7" fill="none" stroke="#93c5fd" stroke-width="1"/>
+            <!-- Eixo vertical central -->
+            <line x1="34" y1="4" x2="34" y2="64" stroke="#60a5fa" stroke-width="1.2"/>
+            <!-- Polo norte/sul -->
+            <circle cx="34" cy="4" r="2" fill="#3b82f6"/>
+            <circle cx="34" cy="64" r="2" fill="#3b82f6"/>
+          </svg>
+          <div style="text-align:center;">
+            <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:10px;font-weight:800;color:#475569;">Internet</div>
+            <div style="font-size:9px;color:#64748b;">IP Público</div>
+          </div>
+        </div>
+
+        <!-- SETA 3: Internet → Gemini -->
+        <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;min-width:80px;">
+          <div style="background:#f0f4ff;border:1.5px solid #a5b4fc;border-radius:8px;padding:3px 8px;font-size:8px;font-weight:800;color:#4338ca;font-family:'Plus Jakarta Sans',sans-serif;text-align:center;white-space:nowrap;">
+            🔒 TLS 1.3<br/>REST API
+          </div>
+          <div style="position:relative;width:100%;display:flex;align-items:center;">
+            <div style="flex:1;height:2.5px;background:repeating-linear-gradient(to right,#4285f4 0,#4285f4 5px,transparent 5px,transparent 10px);"></div>
+            <div style="width:0;height:0;border-top:6px solid transparent;border-bottom:6px solid transparent;border-left:9px solid #4285f4;flex-shrink:0;"></div>
+          </div>
+          <div style="font-size:8px;color:#64748b;text-align:center;">generativelanguage<br/>.googleapis.com</div>
+          <!-- seta retorno -->
+          <div style="position:relative;width:100%;display:flex;align-items:center;margin-top:2px;">
+            <div style="width:0;height:0;border-top:5px solid transparent;border-bottom:5px solid transparent;border-right:8px solid #16a34a;flex-shrink:0;"></div>
+            <div style="flex:1;height:2px;background:repeating-linear-gradient(to left,#16a34a 0,#16a34a 5px,transparent 5px,transparent 10px);"></div>
+          </div>
+          <div style="font-size:8px;color:#16a34a;font-weight:700;text-align:center;">← Resposta Gemini</div>
+        </div>
+
+        <!-- 4. GEMINI API -->
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex-shrink:0;min-width:100px;">
+          <svg width="64" height="58" viewBox="0 0 64 58" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="2" y="2" width="60" height="54" rx="9" fill="#e8f0fe" stroke="#4285f4" stroke-width="2"/>
+            <text x="32" y="28" text-anchor="middle" dominant-baseline="middle" font-size="22" fill="#4285f4">✦</text>
+            <text x="32" y="44" text-anchor="middle" font-family="Plus Jakarta Sans, sans-serif" font-size="7.5" font-weight="800" fill="#1a3a5c" letter-spacing="0.4">Gemini API</text>
+            <circle cx="16" cy="52" r="2.5" fill="#ea4335"/>
+            <circle cx="24" cy="52" r="2.5" fill="#fbbc04"/>
+            <circle cx="40" cy="52" r="2.5" fill="#34a853"/>
+            <circle cx="48" cy="52" r="2.5" fill="#4285f4"/>
+          </svg>
+          <div style="text-align:center;">
+            <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:10px;font-weight:800;color:#4285f4;">Gemini 2.5 Flash</div>
+            <div style="font-size:9px;color:#475569;">Google Cloud</div>
+          </div>
+          <div style="background:#4285f4;color:white;font-size:8px;font-weight:700;border-radius:6px;padding:3px 8px;text-align:center;font-family:'Courier New',monospace;">:443 INBOUND<br/>REST / JSON</div>
+        </div>
+
+      </div><!-- /flex row -->
+
+      <!-- Rodapé do diagrama: tabela de protocolos -->
+      <div style="margin-top:14px;border-top:1.5px solid #c7d7f9;padding-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+        <div style="flex:1;min-width:160px;background:white;border:1.5px solid #dcfce7;border-radius:9px;padding:8px 12px;">
+          <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:9.5px;font-weight:800;color:#166534;margin-bottom:5px;letter-spacing:.5px;">🖥️ MÁQUINA &amp; REDE</div>
+          <table style="width:100%;border-collapse:collapse;font-size:9px;color:#374151;">
+            <tr style="background:#f0fdf4;">
+              <td style="padding:3px 6px;font-weight:700;border-radius:3px;">Máquina</td>
+              <td style="padding:3px 6px;">Desktop corporativo (Totem)</td>
+            </tr>
+            <tr>
+              <td style="padding:3px 6px;font-weight:700;">OS</td>
+              <td style="padding:3px 6px;font-family:'Courier New',monospace;">Windows 10 / 11 x64</td>
+            </tr>
+            <tr style="background:#f0fdf4;">
+              <td style="padding:3px 6px;font-weight:700;border-radius:3px;">Rede</td>
+              <td style="padding:3px 6px;">WiFi <strong>Ceva-Corporate</strong></td>
+            </tr>
+            <tr>
+              <td style="padding:3px 6px;font-weight:700;">Padrão WiFi</td>
+              <td style="padding:3px 6px;font-family:'Courier New',monospace;">802.11ac / 802.11ax</td>
+            </tr>
+          </table>
+        </div>
+        <div style="flex:1;min-width:160px;background:white;border:1.5px solid #dbeafe;border-radius:9px;padding:8px 12px;">
+          <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:9.5px;font-weight:800;color:#1e40af;margin-bottom:5px;letter-spacing:.5px;">🔌 PORTAS &amp; PROTOCOLOS</div>
+          <table style="width:100%;border-collapse:collapse;font-size:9px;color:#374151;">
+            <tr style="background:#eff6ff;">
+              <td style="padding:3px 6px;font-weight:700;border-radius:3px;">Saída (Totem)</td>
+              <td style="padding:3px 6px;font-family:'Courier New',monospace;font-weight:700;color:#1d4ed8;">TCP 443 (HTTPS)</td>
+            </tr>
+            <tr>
+              <td style="padding:3px 6px;font-weight:700;">Protocolo App</td>
+              <td style="padding:3px 6px;font-family:'Courier New',monospace;color:#374151;">HTTPS · REST · JSON</td>
+            </tr>
+            <tr style="background:#eff6ff;">
+              <td style="padding:3px 6px;font-weight:700;border-radius:3px;">Criptografia</td>
+              <td style="padding:3px 6px;font-family:'Courier New',monospace;color:#374151;">TLS 1.3 (end-to-end)</td>
+            </tr>
+            <tr>
+              <td style="padding:3px 6px;font-weight:700;">Destino</td>
+              <td style="padding:3px 6px;font-family:'Courier New',monospace;font-size:8px;color:#374151;">generativelanguage.googleapis.com</td>
+            </tr>
+          </table>
+        </div>
+        <div style="flex:1;min-width:160px;background:white;border:1.5px solid #fde68a;border-radius:9px;padding:8px 12px;">
+          <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:9.5px;font-weight:800;color:#92400e;margin-bottom:5px;letter-spacing:.5px;">📦 O QUE TRAFEGA</div>
+          <div style="font-size:9px;color:#374151;line-height:1.6;">
+            <div style="color:#16a34a;font-weight:700;">✓ Pergunta do usuário (texto)</div>
+            <div style="color:#16a34a;font-weight:700;">✓ 7 trechos das ITs (texto)</div>
+            <div style="color:#16a34a;font-weight:700;">✓ Histórico recente da conversa (texto)</div>
+            <div style="margin-top:4px;color:#dc2626;font-weight:700;">✗ Documentos completos</div>
+            <div style="color:#dc2626;font-weight:700;">✗ Credenciais / banco de dados</div>
+            <div style="color:#dc2626;font-weight:700;">✗ Logs / índices vetoriais</div>
+          </div>
         </div>
       </div>
-    </div>
+
+    </div><!-- /diagrama de rede -->
+
+  <div class="p-local d2">
+    <div class="p-local-lbl">🟢 Perímetro local — tudo processado na própria máquina</div>
 
     <!-- ROW 1: Máquina + Python + Bibliotecas principais -->
     <div class="infra-two-col" style="margin-bottom:14px">
 
       <!-- Máquina Desktop -->
-      <div class="infra-machine d2">
+      <div class="infra-machine d3">
         <div class="infra-machine-title">🖥️ Máquina Desktop corporativa (Totem) - Usuários Blue collar (não possuem e-mail corporativo)</div>
         <div class="infra-machine-body">
           <div class="spec-row">
             <div class="spec-pill">💾 Windows 10/11 x64</div>
             <div class="spec-pill">⚡ RAM mín. 8 GB</div>
             <div class="spec-pill">💽 Min 2 GB em disco</div>
-            <div class="spec-pill wifi">📶 Rede WiFi: Ceva-Corporate</div>
+
+          </div>
+          <div class="wifi-banner" style="margin-bottom:12px">
+            <div class="wifi-banner-icon">📶</div>
+            <div class="wifi-banner-body">
+              <div class="wifi-banner-title">Conectividade de Rede — WiFi Corporativo</div>
+              <div class="wifi-banner-desc">
+                O totem se conecta à internet exclusivamente via rede WiFi corporativa
+                <span class="wifi-ssid">Ceva-Corporate</span>.
+                Essa conexão é utilizada apenas para enviar as consultas ao Gemini (HTTPS saída).
+                Todo o processamento local — leitura de documentos, busca, autenticação — ocorre sem uso da rede.
+              </div>
+            </div>
           </div>
           <div class="storage-box" style="margin-bottom:0">
             <div class="storage-icon">📁</div>
@@ -1125,7 +1367,7 @@
 
     <!-- Origem dos Arquivos: Intelex -->
     <div style="margin-bottom:14px">
-      <div class="card c-orange d4" style="position:relative">
+      <div class="card c-orange d5" style="position:relative">
         <div class="stripe"></div>
         <div class="card-hdr"><span class="card-icon">🗂️</span><div class="card-title">Origem dos Documentos — Intelex → Pasta Local</div></div>
         <div class="card-body" style="padding-left:0;margin-top:4px">
@@ -1155,7 +1397,7 @@
     </div>
 
     <!-- RAG Indexação Pipeline -->
-    <div class="rag-pipeline d5" style="margin-bottom:14px">
+    <div class="rag-pipeline d6" style="margin-bottom:14px">
       <div class="rag-pipeline-lbl">⚙️ Pipeline RAG — Indexação (executado apenas na 1ª vez ao carregar a pasta)</div>
       <div class="rag-steps">
         <div class="rag-step s-txt">
@@ -1207,7 +1449,7 @@
     </div>
 
     <!-- Fluxo de Consulta -->
-    <div class="query-flow d6">
+    <div class="query-flow d7">
       <div class="query-flow-lbl">🔍 Fluxo de Consulta — A cada pergunta do usuário</div>
       <div class="qf-steps">
         <div class="qf-step q1">
@@ -1249,16 +1491,23 @@
 
   </div><!-- /p-local -->
 
-  <div class="out-row" style="margin-top:10px">
+  <div class="out-row d8" style="margin-top:10px">
     <div class="v-arr"><div class="vl"></div></div>
     <div class="out-tag">🔐 Documentos completos, banco de dados, índices e modelos <strong>nunca saem da máquina</strong> — apenas os 7 trechos selecionados + pergunta são enviados via HTTPS pelo WiFi Ceva-Corporate</div>
   </div>
 
-  </div><!-- /infra-panel-tech -->
+</div></div><!-- /page /view-infra -->
 
+<!-- ════════════════ VISÃO GERENCIAL ════════════════ -->
+<div class="view" id="view-gerencial">
+<div class="page">
+  <div class="stamp">CEVA<br>&amp;<br>Logitech</div>
+  <div class="title">
+    <h1>Chatbot CEVA &amp; Logitech — Visão Gerencial</h1>
+    <p>Como a solução funciona · Para gestores e time de TI · Sem jargão técnico</p>
+    <div class="tline"></div>
+  </div>
 
-  <!-- ══════ PAINEL SIMPLIFICADO ══════ -->
-  <div class="infra-panel" id="infra-panel-simple">
 
     <!-- BLOCO WiFi -->
     <div class="simple-analogy sa-amber d1">
@@ -1371,7 +1620,7 @@
 
   </div><!-- /infra-panel-simple -->
 
-</div></div><!-- /page /view-infra -->
+</div></div><!-- /page /view-gerencial -->
 
 </body>
 </html>
