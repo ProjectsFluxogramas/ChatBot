@@ -825,7 +825,7 @@
             <li>Python via <span class="hi">PortalCompany</span> — instalação homologada</li>
             <li>Bibliotecas pip dentro da <span class="hi">política corporativa</span></li>
             <li>App <span class="hi">desktop nativo</span></li>
-            <li>Usuários que vão usar a ferramenta: <span class="hi">Blue-colors (não possuem e-mail corporativo)</span></li>
+            <li>Usuários que vão usar a ferramenta: <span class="hi">Blue collar (não possuem e-mail corporativo)</span></li>
           </ul>
         </div>
       </div>
@@ -911,7 +911,10 @@
     <div class="card c-navy d1" style="flex:1;position:relative">
       <div class="step-num">1</div>
       <div class="stripe"></div>
-      <div class="card-hdr"><span class="card-icon">🔐</span><div class="card-title">Login</div></div>
+      <div class="card-hdr">
+    <span class="card-icon">🔐</span>
+    <div class="card-title">Login — Operational User</div>
+</div>
       <div class="card-body">
         Insira usuário e senha. O sistema valida e libera o acesso conforme seu perfil.
         <div class="u-hl" style="margin-top:8px">👤 Operador → chat<br>📊 BPE → chat + Analytics</div>
@@ -923,7 +926,7 @@
       <div class="stripe"></div>
       <div class="card-hdr"><span class="card-icon">📚</span><div class="card-title">Base de Conhecimento — ITs</div></div>
       <div class="card-body">
-        O chatbot é alimentado pelos documentos de procedimento (.txt / .pdf): recebimento, conferência cega, NF-e, SAP, WMS, importação, exportação e tudo mais documentado.
+        O chatbot é alimentado pelos documentos de procedimento (.txt): recebimento, conferência cega, NF-e, SAP, WMS, importação, exportação e tudo mais documentado.
         <div class="u-hl" style="margin-top:8px">💡 Índice inteligente criado localmente — um "Google interno" das ITs.</div>
       </div>
     </div>
@@ -987,14 +990,14 @@
       <div class="stripe"></div>
       <div class="card-hdr"><span class="card-icon">👷</span><div class="card-title">Operador</div></div>
       <div class="card-body">
-        Continua a conversa, usa atalhos de perguntas frequentes e exporta o histórico em .txt.
+        Continua a conversa, usa atalhos de perguntas frequentes.
       </div>
     </div>
     <div class="h-arr"><div class="h-arr-line"></div><div class="h-arr-head"></div></div>
     <div class="card c-bpe d8" style="flex:1;position:relative">
       <div class="step-num" style="background:var(--bpe)">7b</div>
       <div class="stripe"></div>
-      <div class="card-hdr"><span class="card-icon">📊</span><div class="card-title">BPE — Painel Analytics</div></div>
+      <div class="card-hdr"><span class="card-icon">📊</span><div class="card-title">BPE — Painel Analytics - User Admin</div></div>
       <div class="card-body">
         <ul>
           <li>Acessos e perguntas por usuário</li>
@@ -1061,7 +1064,7 @@
 
       <!-- Máquina Desktop -->
       <div class="infra-machine d2">
-        <div class="infra-machine-title">🖥️ Máquina Desktop corporativa (Totem)</div>
+        <div class="infra-machine-title">🖥️ Máquina Desktop corporativa (Totem) - Usuários Blue collar (não possuem e-mail corporativo)</div>
         <div class="infra-machine-body">
           <div class="spec-row">
             <div class="spec-pill">💾 Windows 10/11 x64</div>
@@ -1074,7 +1077,7 @@
             <div class="storage-body">
               <div class="storage-title">Pasta de Dados da Aplicação</div>
               <div class="storage-path">%APPDATA%\CEVA Logitech Assistente\</div>
-              <div class="storage-desc">Banco SQLite, índice vetorial, cache do modelo e ITs — tudo salvo localmente nessa pasta.</div>
+              <div class="storage-desc">Banco SQLite, índice vetorial, cache do modelo e ITs — tudo salvo localmente nessa pasta oculta do Windowns.</div>
             </div>
           </div>
         </div>
@@ -1085,8 +1088,8 @@
         <div class="infra-machine-title" style="background:var(--infra-python)">🐍 Python e Bibliotecas Principais</div>
         <div class="infra-machine-body">
           <div class="spec-row" style="margin-bottom:10px">
-            <div class="spec-pill python">Python 3.10 / 3.11</div>
-            <div class="spec-pill python">pip — PortalCompany</div>
+            <div class="spec-pill python">Python 3.10 / 3.11 — Instalado via PortalCompany</div>
+            <div class="spec-pill python">pip —  dentro da política corporativa</div>
           </div>
           <!-- Simplified lib grid with descriptions -->
           <div style="display:flex;flex-direction:column;gap:6px">
@@ -1129,8 +1132,23 @@
           <div class="intelex-flow">
             <div class="intelex-step"><div class="intelex-num">1</div><div class="intelex-text">Acesse o <strong>Intelex</strong> e localize as Instruções de Trabalho (ITs) do setor desejado.</div></div>
             <div class="intelex-step"><div class="intelex-num">2</div><div class="intelex-text">Exporte/salve cada IT como arquivo <strong>.txt</strong> (texto simples, sem formatação complexa).</div></div>
-            <div class="intelex-step"><div class="intelex-num">3</div><div class="intelex-text">Coloque os arquivos na pasta configurada: <strong>Base de Conhecimento IT\</strong> (dentro do AppData da ferramenta ou pasta personalizada via interface).</div></div>
-            <div class="intelex-step"><div class="intelex-num">4</div><div class="intelex-text">Na interface do Chatbot via Usuário com privilégios de administrador, clique em <strong>"Carregar Pasta"</strong> — o sistema detecta alterações automaticamente e re-indexa apenas quando necessário.</div></div>
+            <div class="intelex-step">
+    <div class="intelex-num">3</div>
+    <div class="intelex-text">
+        O administrador, logado com perfil <strong>Admin</strong>, deve abrir a interface do ChatBot e clicar em 
+        <strong>"Carregar Arquivos"</strong>. Os documentos selecionados serão armazenados automaticamente na pasta 
+        <strong>AppData</strong> da aplicação.
+    </div>
+</div>
+
+<div class="intelex-step">
+    <div class="intelex-num">4</div>
+    <div class="intelex-text">
+        Durante a primeira configuração, os arquivos enviados são <strong>indexados automaticamente</strong> para criação 
+        da base de conhecimento. Caso haja atualização ou inclusão de novos documentos, o administrador deverá realizar 
+        novamente o upload através da interface para que o sistema execute a <strong>reindexação</strong>.
+    </div>
+</div>
           </div>
         </div>
       </div>
@@ -1218,7 +1236,7 @@
         <div class="qf-step q4">
           <div class="qf-step-icon">🤖</div>
           <div class="qf-step-title">Gemini 2.5 Flash</div>
-          <div class="qf-step-desc">Recebe <strong>apenas</strong>: pergunta + 7 trechos + histórico recente (4 turnos)<br>Via WiFi <strong>Ceva-Corporate</strong> → API Google (HTTPS)</div>
+          <div class="qf-step-desc">Recebe <strong>apenas</strong>: pergunta + 7 trechos + histórico recente da conversa<br>Via WiFi <strong>Ceva-Corporate</strong> → API Google (HTTPS)</div>
         </div>
         <div class="rag-arrow"><div class="rag-arrow-line"></div><div class="rag-arrow-head"></div></div>
         <div class="qf-step q5">
@@ -1233,7 +1251,7 @@
 
   <div class="out-row" style="margin-top:10px">
     <div class="v-arr"><div class="vl"></div></div>
-    <div class="out-tag">🔐 &nbsp;<strong>Garantia de privacidade:</strong>&nbsp; documentos completos, banco de dados, índices e modelos <strong>nunca saem da máquina</strong> — apenas os 7 trechos selecionados + pergunta são enviados via HTTPS pelo WiFi Ceva-Corporate</div>
+    <div class="out-tag">🔐 Documentos completos, banco de dados, índices e modelos <strong>nunca saem da máquina</strong> — apenas os 7 trechos selecionados + pergunta são enviados via HTTPS pelo WiFi Ceva-Corporate</div>
   </div>
 
   </div><!-- /infra-panel-tech -->
@@ -1247,8 +1265,8 @@
       <div class="sa-icon">📶</div>
       <div class="sa-body">
         <div class="sa-label">Conectividade de rede</div>
-        <div class="sa-title">O totem usa o WiFi corporativo <strong>Ceva-Corporate</strong> para se comunicar com a IA — e somente para isso</div>
-        <div class="sa-desc">Todo o processamento interno da ferramenta — leitura de documentos, busca nos textos, login de usuários e salvamento do histórico — acontece dentro da própria máquina, sem precisar da rede. A conexão WiFi é usada exclusivamente no momento de enviar a pergunta ao Gemini (Google) e receber a resposta — uma operação rápida e criptografada via HTTPS.</div>
+        <div class="sa-title">O totem usa o WiFi corporativo <strong>Ceva-Corporate</strong> para se comunicar com a IA</div>
+        <div class="sa-desc">Todo o processamento interno da ferramenta — leitura de documentos, busca nos textos, login de usuários e salvamento do histórico — acontece dentro da própria máquina, sem precisar da rede. A conexão WiFi é usada exclusivamente no momento de enviar a pergunta ao Gemini (Google) e receber a resposta</div>
         <div class="sa-tip">🔒 Nenhuma informação trafega pela rede corporativa além do envio controlado ao Gemini. A rede WiFi <strong>Ceva-Corporate</strong> é o único caminho de saída de dados da aplicação.</div>
       </div>
     </div>
@@ -1259,7 +1277,7 @@
       <div class="sa-body">
         <div class="sa-label">Arquitetura de implantação</div>
         <div class="sa-title">Solução instalada localmente — sem dependência de servidores externos ou infraestrutura de nuvem própria</div>
-        <div class="sa-desc">A ferramenta é executada diretamente no computador do totem, operando de forma autônoma. Não requer servidor dedicado, VPN corporativa ou licença de plataforma SaaS. Todo o processamento — leitura de documentos, geração do índice de busca, autenticação de usuários e armazenamento de histórico — ocorre dentro da própria máquina, sem tráfego de dados internos na rede local.</div>
+        <div class="sa-desc">A ferramenta é executada diretamente no computador do totem, operando de forma autônoma. Não requer servidor dedicado. Todo o processamento — leitura de documentos, geração do índice de busca, autenticação de usuários e armazenamento de histórico — ocorre dentro da própria máquina.</div>
         <div class="sa-tip">📁 Todos os ativos da aplicação (documentos, banco de dados, índice de busca e credenciais criptografadas) residem em uma pasta dedicada no sistema operacional do totem — garantindo rastreabilidade e controle total pelo time de TI.</div>
       </div>
     </div>
@@ -1270,7 +1288,7 @@
       <div class="sa-body">
         <div class="sa-label">Base de conhecimento operacional</div>
         <div class="sa-title">O chatbot é alimentado exclusivamente pelas Instruções de Trabalho (ITs) oficiais — sem conteúdo externo ou gerado livremente pela IA</div>
-        <div class="sa-desc">As ITs são exportadas do <strong>Intelex</strong> e carregadas na ferramenta pelo administrador responsável. A partir disso, o sistema constrói um <strong>índice de busca</strong> sobre esses documentos — capaz de localizar informações por contexto e intenção, não apenas por palavras-chave exatas. Isso garante que todas as respostas sejam rastreáveis a um documento oficial.</div>
+        <div class="sa-desc">As ITs são exportadas do <strong>Intelex</strong> e carregadas na ferramenta pelo administrador responsável. A partir disso, o sistema constrói um <strong>índice de busca localmente</strong> sobre esses documentos — capaz de localizar informações por contexto e intenção, não apenas por palavras-chave exatas. Isso garante que todas as respostas sejam rastreáveis a um documento oficial.</div>
         <div class="sa-tip">🔄 A atualização da base é sob demanda: quando uma IT for revisada no Intelex, basta substituir o arquivo e recarregar a pasta. O sistema reprocessa automaticamente apenas os documentos alterados.</div>
       </div>
     </div>
@@ -1334,7 +1352,7 @@
         <div class="sa-label">Governança sobre o uso da Inteligência Artificial</div>
         <div class="sa-title">O Gemini atua como motor de linguagem — não como repositório de dados ou tomador de decisão</div>
         <div class="sa-desc">O modelo de linguagem do Google é utilizado exclusivamente para a etapa de <strong>síntese e formatação da resposta</strong>. Ele não recebe a base documental completa, não tem acesso ao banco de usuários, não armazena histórico de conversas e não é consultado para nenhuma finalidade além de redigir a resposta a partir do contexto previamente filtrado pelo sistema local. A conta Google utilizada opera sob <strong>política de não retenção de dados</strong>.</div>
-        <div class="sa-tip">🔐 O controle do que é enviado à IA é exercido integralmente pelo sistema local. A transmissão ocorre via WiFi corporativo <strong>Ceva-Corporate</strong> usando protocolo HTTPS com criptografia em trânsito.</div>
+        <div class="sa-tip">🔐 O controle do que é enviado à IA é exercido integralmente pelo sistema local. A transmissão ocorre via WiFi corporativo <strong>Ceva-Corporate</strong> usando protocolo HTTPS.</div>
       </div>
     </div>
 
