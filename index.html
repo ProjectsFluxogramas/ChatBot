@@ -731,6 +731,10 @@
   <span class="z-val" id="zoomVal">100%</span>
   <div class="z-sep"></div>
   <button onclick="adjustZoom(+10)">+</button>
+  <div class="z-sep"></div>
+  <button id="lang-pt" onclick="setLang('pt')" style="font-size:11px;font-weight:700;padding:0 7px;width:auto;border-bottom:2px solid #1d4ed8;color:#1d4ed8;">🇧🇷 PT</button>
+  <button id="lang-en" onclick="setLang('en')" style="font-size:11px;font-weight:700;padding:0 7px;width:auto;border-bottom:2px solid transparent;">🇺🇸 EN</button>
+  <button id="lang-es" onclick="setLang('es')" style="font-size:11px;font-weight:700;padding:0 7px;width:auto;border-bottom:2px solid transparent;">🇪🇸 ES</button>
 </div>
 
 <div class="toggle-ctrl" id="mainToggle" style="display:none">
@@ -744,6 +748,8 @@
 
 <script>
   var z = 100;
+  var currentLang = 'pt';
+
   function adjustZoom(d) { z=Math.min(200,Math.max(30,z+d)); document.getElementById('zoomVal').textContent=z+'%'; document.body.style.zoom=z+'%'; }
 
   function slidePill(btnEl) {
@@ -763,12 +769,802 @@
     });
     document.getElementById('mainToggle').style.display = (v === 'capa') ? 'none' : '';
     slidePill(document.getElementById('btn-'+v));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  // Init pill on first real view
+  // ═══════════════════════════════════════════════════
+  // TRANSLATION DICTIONARY
+  // ═══════════════════════════════════════════════════
+  var T = {
+    pt: {
+      // NAV
+      'nav-infra':     '🖥️ Infraestrutura',
+      'nav-tech':      '🔄 Fluxo de Dados',
+      'nav-gerencial': '📋 Visão Gerencial',
+      'nav-user':      '👤 Visão do Usuário',
+      // COVER
+      'cv-badge':    'Documentação de projeto',
+      'cv-title':    'ChatBot Assistente',
+      'cv-subtitle': 'Arquitetura · Infraestrutura · Fluxo de Dados · Experiência do Usuário',
+      'cv-meta-0':   'Solução 100% local',
+      'cv-meta-1':   'Pipeline RAG Híbrido',
+      'cv-meta-2':   'Motor Gemini 2.5 Flash',
+      'cv-meta-3':   'Base de Conhecimento: Intelex ITs',
+      'cv-enter':    'Acessar Projeto',
+      // ── TECH (Fluxo de Dados) ──
+      'tech-h1':         'Chatbot CEVA &amp; Logitech — Fluxo de Dados',
+      'tech-sub':        'O que fica local · O que sai',
+      'tech-local-lbl':  '🟢 Perímetro local — interface grafica e banco de dados',
+      'tech-c1-title':   'Instalação Local — Totem',
+      'tech-c1-b1':      'Programa Python instalado <span class="hi">diretamente no totem</span> — executa 100% local',
+      'tech-c1-b2':      'Python via <span class="hi">PortalCompany</span> — instalação homologada',
+      'tech-c1-b3':      'Bibliotecas pip dentro da <span class="hi">política corporativa</span>',
+      'tech-c1-b4':      'App <span class="hi">desktop nativo</span>',
+      'tech-c1-b5':      'Usuários que vão usar a ferramenta: <span class="hi">Blue collar (não possuem e-mail corporativo)</span>',
+      'tech-c2-title':   'Autenticação (RBAC)',
+      'tech-c2-b1':      'Interface gráfica com tela de <span class="hi">cadastro login e senha</span>',
+      'tech-c2-b2':      'Sugestão de <span class="hi">senha forte</span> no cadastro de novos usuários',
+      'tech-c2-b3':      '≥ 8 caracteres • A–Z • 0–9 • caractere especial (!@#$…)',
+      'tech-c2-b4':      'Senhas armazenadas com <span class="hi">hash SHA-256</span>',
+      'tech-c2-b5':      'Perfis: <span class="hi">Operador</span> e <span class="hi">BPE</span>',
+      'tech-c3-title':   'Auditoria (SQLite — banco local no totem)',
+      'tech-c3-b1':      'Banco de dados SQLite armazenado <span class="hi">no próprio totem</span> — não trafega pela rede',
+      'tech-c3-b2':      'Todo acesso e toda pergunta registrados localmente',
+      'tech-c3-b3':      'Rastreabilidade completa: quem, o quê, quando...',
+      'tech-c4-title':   'Documentos da Operação (ITs)',
+      'tech-c4-b1':      'Documentos .txt carregados de pasta local — <span class="hi">nenhum arquivo é enviado externamente</span>',
+      'tech-c4-b2':      'Processamento via RAG em Python: geração de <span class="hi">embeddings e índice vetorial local</span>',
+      'tech-c4-b3':      'Durante a consulta, o sistema recupera apenas <span class="hi">chunks semanticamente relevantes</span>',
+      'tech-c4-b4':      'Somente esses trechos são enviados para a IA para geração da resposta',
+      'tech-outtag':     '⚠️ &nbsp;<strong>Único dado enviado para a IA:</strong>&nbsp; pergunta do usuário + trechos relevantes das ITs (chunks) usados como contexto para gerar a resposta &nbsp;→&nbsp; requisição HTTPS para API Gemini (Google) com faturamento ativo e política de não retenção de dados',
+      'tech-ext-lbl':    '🌐 Externo — Google Gemini API (HTTPS outbound)',
+      'tech-c5-title':   'Gemini 2.5 Flash — Geração de Resposta',
+      'tech-c5-b1':      '<span class="hi">Recebe:</span> pergunta + trechos das ITs + histórico recente',
+      'tech-c5-b2':      '<span class="hi">Não recebe:</span> documentos completos, credenciais, logs ou dados de sistema',
+      'tech-c5-b3':      'System prompt: <em>responder somente com base no contexto fornecido</em>',
+      // ── USER (Visão do Usuário) ──
+      'user-h1':     'Chatbot CEVA &amp; Logitech — Visão do Usuário',
+      'user-sub':    'Como o sistema funciona na prática · Para operadores e time BPE',
+      'user-c1-title': 'Login — Operational User',
+      'user-c1-body':  'Insira usuário e senha. O sistema valida e libera o acesso conforme seu perfil.',
+      'user-c1-hl':    '👤 Operador → chat<br>📊 BPE → chat + Analytics',
+      'user-c2-title': 'Base de Conhecimento — ITs',
+      'user-c2-body':  'O chatbot é alimentado pelos documentos de procedimento (.txt): recebimento, conferência cega, NF-e, SAP, WMS, importação, exportação e tudo mais documentado.',
+      'user-c2-hl':    '💡 Índice inteligente criado localmente — um "Google interno" das ITs.',
+      'user-c3-title': 'Você Faz uma Pergunta',
+      'user-c3-body':  'Digite normalmente:',
+      'user-c3-hl':    '"Como faço o descarregamento de carga fracionada?"<br>"Qual o prazo para fechamento da NF-e?"',
+      'user-c3-ctx':   'O sistema lembra o contexto da conversa.',
+      'user-c4-title': 'Busca nos Documentos',
+      'user-c4-body':  'Duas buscas simultâneas:',
+      'user-c4-b1':    '<span class="hi">Por palavras exatas</span> — siglas, códigos (NF-e, SAP, WMS)',
+      'user-c4-b2':    '<span class="hi">Por significado</span> — entende a intenção da pergunta',
+      'user-c4-sel':   'Os <span class="hi">7 trechos mais relevantes</span> são selecionados.',
+      'user-c5-title': 'IA Monta a Resposta (Gemini)',
+      'user-c5-body':  'Trechos + pergunta enviados ao Gemini com instrução:',
+      'user-c5-hl':    '"Responda SOMENTE com base no contexto fornecido."',
+      'user-c5-never': 'A IA <span class="hi">nunca inventa</span> — se não estiver nas ITs, informa que não encontrou.',
+      'user-c6-title': 'Resposta Clara e Rastreável',
+      'user-c6-body':  'Formatada com passos, listas e destaques.',
+      'user-c6-hl':    '🔍 <strong>"Ver fontes"</strong> mostra exatamente quais trechos das ITs foram usados.',
+      'user-c7-title': 'Operador',
+      'user-c7-body':  'Continua a conversa, usa atalhos de perguntas frequentes.',
+      'user-c8-title': 'BPE — Painel Analytics - User Admin',
+      'user-c8-b1':    'Acessos e perguntas por usuário',
+      'user-c8-b2':    'Dúvidas mais frequentes da equipe',
+      'user-c8-b3':    'Export CSV para Gráfico de Pareto',
+      'user-final-title': 'Dúvida resolvida com base nas ITs oficiais',
+      'user-final-body':  'Sem procurar em pastas, sem ligar para outra área, sem depender de um colega disponível.',
+      // ── INFRA ──
+      'infra-h1':    'Chatbot CEVA &amp; Logitech — Infraestrutura',
+      'infra-sub':   'Máquina · Rede · Bibliotecas · Pipeline de Indexação · Fluxo de Consulta',
+      'infra-net-lbl': '🌐 Diagrama de Rede — Fluxo de Requisição HTTP/S ao Gemini (Rede Cabeada)',
+      'infra-totem-title': '🖥️ Totem',
+      'infra-totem-os':    'Windows 10/11',
+      'infra-totem-app':   'Python App',
+      'infra-arrow1-top':  '🔌 Ceva-Corporate',
+      'infra-arrow1-bot':  'Ethernet — Rede Cabeada',
+      'infra-return1':     '← Resposta JSON',
+      'infra-switch-sub':  'Ceva-Corporate',
+      'infra-arrow2-bot':  'HTTPS / TLS 1.3',
+      'infra-return2':     '← Resposta JSON',
+      'infra-internet':    'Internet',
+      'infra-internet-ip': 'IP Público',
+      'infra-arrow3-bot':  'generativelanguage\n.googleapis.com',
+      'infra-return3':     '← Resposta Gemini',
+      'infra-gemini-sub':  'Google Cloud',
+      'infra-tbl1-title':  '🖥️ MÁQUINA &amp; REDE',
+      'infra-tbl1-r1a': 'Máquina',  'infra-tbl1-r1b': 'Desktop corporativo (Totem)',
+      'infra-tbl1-r2a': 'OS',
+      'infra-tbl1-r3a': 'Rede',     'infra-tbl1-r3b': 'Cabeada <strong>Ceva-Corporate</strong>',
+      'infra-tbl1-r4a': 'Padrão',   'infra-tbl1-r4b': 'Ethernet 1Gbps (Cat5e/Cat6)',
+      'infra-tbl2-title': '🔌 PORTAS &amp; PROTOCOLOS',
+      'infra-tbl2-r1a': 'Saída (Totem)',
+      'infra-tbl2-r2a': 'Protocolo App',
+      'infra-tbl2-r3a': 'Criptografia',
+      'infra-tbl2-r4a': 'Destino',
+      'infra-tbl3-title': '📦 O QUE TRAFEGA',
+      'infra-tbl3-yes1': '✓ Pergunta do usuário (texto)',
+      'infra-tbl3-yes2': '✓ 7 trechos das ITs (texto)',
+      'infra-tbl3-yes3': '✓ Histórico recente da conversa (texto)',
+      'infra-tbl3-no1':  '✗ Documentos completos',
+      'infra-tbl3-no2':  '✗ Credenciais / banco de dados',
+      'infra-tbl3-no3':  '✗ Logs / índices vetoriais',
+      'infra-local-lbl': '🟢 Perímetro local — tudo processado na própria máquina',
+      'infra-mach-title': '🖥️ Máquina Desktop corporativa (Totem) - Usuários Blue collar (não possuem e-mail corporativo)',
+      'infra-wifi-title': 'Conectividade de Rede — Cabeada Corporativa',
+      'infra-wifi-desc':  'O totem se conecta à internet exclusivamente via rede cabeada corporativa <span class="wifi-ssid">Ceva-Corporate</span>. Essa conexão é utilizada apenas para enviar as consultas ao Gemini (HTTPS saída). Todo o processamento local — leitura de documentos, busca, autenticação — ocorre sem uso da rede.',
+      'infra-folder-title': 'Pasta de Dados da Aplicação',
+      'infra-folder-desc':  'Banco SQLite, índice vetorial, cache do modelo e ITs — tudo salvo localmente nessa pasta oculta do Windowns.',
+      'infra-python-title': '🐍 Python e Bibliotecas Principais',
+      'infra-lib-pw':  'Cria a interface gráfica do chatbot no navegador',
+      'infra-lib-st':  'Transforma textos em vetores numéricos para busca por significado',
+      'infra-lib-fc':  'Motor de busca vetorial — encontra os trechos mais relevantes rapidamente',
+      'infra-lib-bm':  'Busca por palavras exatas — ideal para siglas e códigos (NF-e, SAP, WMS)',
+      'infra-lib-ga':  'Conector com a API do Gemini — envia a pergunta e recebe a resposta',
+      'infra-lib-sq':  'Banco de dados local de usuários, logs e senhas criptografadas',
+      'infra-intelex-title': 'Origem dos Documentos — Intelex → Pasta Local',
+      'infra-int-1': 'Acesse o <strong>Intelex</strong> e localize as Instruções de Trabalho (ITs) do setor desejado.',
+      'infra-int-2': 'Exporte/salve cada IT como arquivo <strong>.txt</strong> (texto simples, sem formatação complexa).',
+      'infra-int-3': 'O administrador, logado com perfil <strong>Admin</strong>, deve abrir a interface do ChatBot e clicar em <strong>"Carregar Arquivos"</strong>. Os documentos selecionados serão armazenados automaticamente na pasta <strong>AppData</strong> da aplicação.',
+      'infra-int-4': 'Durante a primeira configuração, os arquivos enviados são <strong>indexados automaticamente</strong> para criação da base de conhecimento. Caso haja atualização ou inclusão de novos documentos, o administrador deverá realizar novamente o upload através da interface para que o sistema execute a <strong>reindexação</strong>.',
+      'infra-rag-lbl':    '⚙️ Pipeline RAG — Indexação (executado apenas na 1ª vez ao carregar a pasta)',
+      'infra-rag-s1-title': 'Leitura dos arquivos',
+      'infra-rag-s1-desc':  'Todos os .txt da pasta são lidos e identificados pelo nome do arquivo',
+      'infra-rag-s2-title': 'Divisão em Trechos',
+      'infra-rag-s2-desc':  'Cada documento é cortado em blocos menores com pequena sobreposição entre eles — para não perder contexto nas bordas',
+      'infra-rag-s2-note':  '▓ = sobreposição entre blocos',
+      'infra-rag-s3-title': 'Conversão em Vetores',
+      'infra-rag-s3-desc':  'Cada trecho é transformado num conjunto de números que representa seu "significado" — processado 100% local pelo modelo MiniLM',
+      'infra-rag-s4-title': 'Índice de Busca por Significado (FAISS)',
+      'infra-rag-s4-desc':  'Os vetores são organizados num índice local que permite buscas instantâneas por semelhança de significado',
+      'infra-rag-s5-title': 'Índice de Busca por Palavras (BM25)',
+      'infra-rag-s5-desc':  'Um segundo índice para busca por termos exatos — garante que siglas e códigos técnicos sejam sempre encontrados',
+      'infra-qf-lbl':    '🔍 Fluxo de Consulta — A cada pergunta do usuário',
+      'infra-qf-s1-title': 'Pergunta do Usuário',
+      'infra-qf-s1-desc':  'Texto digitado na interface → convertido em vetor localmente para comparação de significado',
+      'infra-qf-s2-title': 'Dupla Busca',
+      'infra-qf-s2-desc':  '<strong>Por significado</strong> (FAISS): encontra trechos com contexto semelhante<br><strong>Por palavras</strong> (BM25): encontra trechos com os mesmos termos',
+      'infra-qf-s3-title': 'Seleção dos Melhores Trechos',
+      'infra-qf-s3-desc':  'Os resultados das duas buscas são combinados e os mais relevantes e variados são selecionados — evitando repetição',
+      'infra-qf-s3-badge': '→ 7 trechos finais selecionados ←',
+      'infra-qf-s4-title': 'Gemini 2.5 Flash',
+      'infra-qf-s4-desc':  'Recebe <strong>apenas</strong>: pergunta + 7 trechos + histórico recente da conversa<br>Via rede cabeada <strong>Ceva-Corporate</strong> → API Google (HTTPS)',
+      'infra-qf-s5-title': 'Resposta ao Usuário',
+      'infra-qf-s5-desc':  'Texto formatado com passos e destaques<br>Fontes indicadas (arquivo + trecho)<br>Histórico salvo localmente',
+      'infra-outtag': '🔐 Documentos completos, banco de dados, índices e modelos <strong>nunca saem da máquina</strong> — apenas os 7 trechos selecionados + pergunta são enviados via HTTPS pela rede cabeada Ceva-Corporate',
+      // ── GERENCIAL ──
+      'ger-h1':  'Chatbot CEVA &amp; Logitech — Visão Gerencial',
+      'ger-sub': 'Como a solução funciona · Para gestores e time de TI · Sem jargão técnico',
+      'ger-b0-label': 'Conectividade de rede',
+      'ger-b0-title': 'O totem usa a rede cabeada corporativa <strong>Ceva-Corporate</strong> para se comunicar com a IA',
+      'ger-b0-desc':  'Todo o processamento interno da ferramenta — leitura de documentos, busca nos textos, login de usuários e salvamento do histórico — acontece dentro da própria máquina, sem precisar da rede. A conexão cabeada é usada exclusivamente no momento de enviar a pergunta ao Gemini (Google) e receber a resposta',
+      'ger-b0-tip':   '🔒 Nenhuma informação trafega pela rede corporativa além do envio controlado ao Gemini. A rede cabeada <strong>Ceva-Corporate</strong> é o único caminho de saída de dados da aplicação.',
+      'ger-b1-label': 'Arquitetura de implantação',
+      'ger-b1-title': 'Solução instalada localmente — sem dependência de servidores externos ou infraestrutura de nuvem própria',
+      'ger-b1-desc':  'A ferramenta é executada diretamente no computador do totem, operando de forma autônoma. Não requer servidor dedicado. Todo o processamento — leitura de documentos, geração do índice de busca, autenticação de usuários e armazenamento de histórico — ocorre dentro da própria máquina.',
+      'ger-b1-tip':   '📁 Todos os ativos da aplicação (documentos, banco de dados, índice de busca e credenciais criptografadas) residem em uma pasta dedicada no sistema operacional do totem — garantindo rastreabilidade e controle total pelo time de TI.',
+      'ger-b2-label': 'Base de conhecimento operacional',
+      'ger-b2-title': 'O chatbot é alimentado exclusivamente pelas Instruções de Trabalho (ITs) oficiais — sem conteúdo externo ou gerado livremente pela IA',
+      'ger-b2-desc':  'As ITs são exportadas do <strong>Intelex</strong> e carregadas na ferramenta pelo administrador responsável. A partir disso, o sistema constrói um <strong>índice de busca localmente</strong> sobre esses documentos — capaz de localizar informações por contexto e intenção, não apenas por palavras-chave exatas. Isso garante que todas as respostas sejam rastreáveis a um documento oficial.',
+      'ger-b2-tip':   '🔄 A atualização da base é sob demanda: quando uma IT for revisada no Intelex, basta substituir o arquivo e recarregar a pasta. O sistema reprocessa automaticamente apenas os documentos alterados.',
+      'ger-b3-label': 'Mecanismo de recuperação e geração de respostas',
+      'ger-b3-title': 'A IA não responde com base em conhecimento genérico — ela é instruída a responder somente com o que está nas ITs carregadas',
+      'ger-b3-desc':  'Ao receber uma pergunta, o sistema realiza uma <strong>busca inteligente</strong> sobre todos os documentos e seleciona apenas os trechos mais relevantes ao contexto da consulta. Esses trechos — e somente eles — são enviados ao modelo de linguagem (Gemini, do Google) junto à pergunta do usuário, com instrução explícita de responder exclusivamente com base no material fornecido.',
+      'ger-b3-tip':   '✅ Esse mecanismo elimina o risco de respostas inventadas pela IA — garantindo que toda informação entregue ao operador seja auditável e rastreada a uma fonte oficial.',
+      'ger-flow-title': 'Ciclo de uma consulta — do operador à resposta rastreável',
+      'ger-f1-title': 'Consulta do operador',
+      'ger-f1-desc':  'O usuário formula a dúvida em linguagem natural, sem necessidade de conhecer a estrutura dos documentos',
+      'ger-f2-title': 'Recuperação contextual',
+      'ger-f2-desc':  'O sistema localiza, entre todas as ITs, os <strong>trechos semanticamente mais aderentes</strong> à consulta — por significado, não apenas por palavra exata',
+      'ger-f3-title': 'Envio controlado à IA',
+      'ger-f3-desc':  'Somente os trechos selecionados + a pergunta são transmitidos ao Gemini via rede cabeada <strong>Ceva-Corporate</strong> — nenhum documento completo trafega',
+      'ger-f4-title': 'Síntese pela IA',
+      'ger-f4-desc':  'O Gemini estrutura uma resposta clara e objetiva, <strong>circunscrita ao contexto fornecido</strong> — sem extrapolação ou conteúdo não referenciado',
+      'ger-f5-title': 'Resposta rastreável',
+      'ger-f5-desc':  'O operador recebe a resposta com indicação das <strong>fontes documentais utilizadas</strong>, preservando a cadeia de rastreabilidade',
+      'ger-b4-label': 'Governança sobre o uso da Inteligência Artificial',
+      'ger-b4-title': 'O Gemini atua como motor de linguagem — não como repositório de dados ou tomador de decisão',
+      'ger-b4-desc':  'O modelo de linguagem do Google é utilizado exclusivamente para a etapa de <strong>síntese e formatação da resposta</strong>. Ele não recebe a base documental completa, não tem acesso ao banco de usuários, não armazena histórico de conversas e não é consultado para nenhuma finalidade além de redigir a resposta a partir do contexto previamente filtrado pelo sistema local. A conta Google utilizada opera sob <strong>política de não retenção de dados</strong>.',
+      'ger-b4-tip':   '🔐 O controle do que é enviado à IA é exercido integralmente pelo sistema local. A transmissão ocorre via rede cabeada corporativa <strong>Ceva-Corporate</strong> usando protocolo HTTPS.',
+      'ger-privacy-title': 'Síntese de conformidade e soberania dos dados',
+      'ger-privacy-desc':  '<strong>Dados que permanecem exclusivamente no ambiente local:</strong> base documental completa (ITs), banco de dados de usuários, histórico de conversas, índice de busca e credenciais de acesso (armazenadas com hash criptográfico SHA-256).<br><br><strong>Dados transmitidos externamente:</strong> unicamente a consulta do usuário somada aos trechos documentais selecionados, transmitidos via rede cabeada <strong>Ceva-Corporate</strong> → protocolo HTTPS para a API do Google Gemini.<br><br>A arquitetura foi deliberadamente desenhada para <strong>minimizar a superfície de exposição de dados</strong>, mantendo soberania operacional sobre a base de conhecimento e conformidade com políticas de privacidade corporativa.',
+    },
+    en: {
+      'nav-infra':     '🖥️ Infrastructure',
+      'nav-tech':      '🔄 Data Flow',
+      'nav-gerencial': '📋 Management View',
+      'nav-user':      '👤 User View',
+      'cv-badge':    'Project Documentation',
+      'cv-title':    'Assistant ChatBot',
+      'cv-subtitle': 'Architecture · Infrastructure · Data Flow · User Experience',
+      'cv-meta-0':   '100% Local Solution',
+      'cv-meta-1':   'Hybrid RAG Pipeline',
+      'cv-meta-2':   'Gemini 2.5 Flash Engine',
+      'cv-meta-3':   'Knowledge Base: Intelex Work Instructions',
+      'cv-enter':    'Open Project',
+      'tech-h1':         'Chatbot CEVA &amp; Logitech — Data Flow',
+      'tech-sub':        'What stays local · What leaves',
+      'tech-local-lbl':  '🟢 Local perimeter — UI and database',
+      'tech-c1-title':   'Local Installation — Workstation',
+      'tech-c1-b1':      'Python program installed <span class="hi">directly on the workstation</span> — runs 100% locally',
+      'tech-c1-b2':      'Python via <span class="hi">PortalCompany</span> — approved installation',
+      'tech-c1-b3':      'pip libraries within <span class="hi">corporate policy</span>',
+      'tech-c1-b4':      '<span class="hi">Native desktop</span> app',
+      'tech-c1-b5':      'Target users: <span class="hi">Blue collar workers (no corporate email)</span>',
+      'tech-c2-title':   'Authentication (RBAC)',
+      'tech-c2-b1':      'Graphical interface with <span class="hi">registration, login and password</span> screen',
+      'tech-c2-b2':      '<span class="hi">Strong password</span> suggestion when registering new users',
+      'tech-c2-b3':      '≥ 8 characters • A–Z • 0–9 • special character (!@#$…)',
+      'tech-c2-b4':      'Passwords stored with <span class="hi">SHA-256 hash</span>',
+      'tech-c2-b5':      'Profiles: <span class="hi">Operator</span> and <span class="hi">BPE</span>',
+      'tech-c3-title':   'Audit Log (SQLite — local database)',
+      'tech-c3-b1':      'SQLite database stored <span class="hi">on the workstation itself</span> — never transmitted over the network',
+      'tech-c3-b2':      'All access and all questions logged locally',
+      'tech-c3-b3':      'Full traceability: who, what, when...',
+      'tech-c4-title':   'Work Instructions Documents (ITs)',
+      'tech-c4-b1':      '.txt documents loaded from a local folder — <span class="hi">no file is sent externally</span>',
+      'tech-c4-b2':      'RAG processing in Python: <span class="hi">embeddings and local vector index</span> generation',
+      'tech-c4-b3':      'During query, the system retrieves only <span class="hi">semantically relevant chunks</span>',
+      'tech-c4-b4':      'Only these chunks are sent to the AI to generate the answer',
+      'tech-outtag':     '⚠️ &nbsp;<strong>Only data sent to the AI:</strong>&nbsp; user question + relevant IT chunks used as context to generate the answer &nbsp;→&nbsp; HTTPS request to Gemini API (Google) with active billing and no data retention policy',
+      'tech-ext-lbl':    '🌐 External — Google Gemini API (HTTPS outbound)',
+      'tech-c5-title':   'Gemini 2.5 Flash — Response Generation',
+      'tech-c5-b1':      '<span class="hi">Receives:</span> question + IT chunks + recent history',
+      'tech-c5-b2':      '<span class="hi">Does NOT receive:</span> full documents, credentials, logs or system data',
+      'tech-c5-b3':      'System prompt: <em>answer only based on the provided context</em>',
+      'user-h1':     'Chatbot CEVA &amp; Logitech — User View',
+      'user-sub':    'How the system works in practice · For operators and BPE team',
+      'user-c1-title': 'Login — Operational User',
+      'user-c1-body':  'Enter username and password. The system validates and grants access based on your profile.',
+      'user-c1-hl':    '👤 Operator → chat<br>📊 BPE → chat + Analytics',
+      'user-c2-title': 'Knowledge Base — Work Instructions',
+      'user-c2-body':  'The chatbot is powered by procedure documents (.txt): receiving, blind check, NF-e, SAP, WMS, import, export and all documented processes.',
+      'user-c2-hl':    '💡 Smart index created locally — an internal "Google" for the ITs.',
+      'user-c3-title': 'You Ask a Question',
+      'user-c3-body':  'Just type naturally:',
+      'user-c3-hl':    '"How do I unload fractional cargo?"<br>"What is the deadline for closing the NF-e?"',
+      'user-c3-ctx':   'The system remembers the conversation context.',
+      'user-c4-title': 'Document Search',
+      'user-c4-body':  'Two simultaneous searches:',
+      'user-c4-b1':    '<span class="hi">By exact words</span> — acronyms, codes (NF-e, SAP, WMS)',
+      'user-c4-b2':    '<span class="hi">By meaning</span> — understands the intent of the question',
+      'user-c4-sel':   'The <span class="hi">7 most relevant chunks</span> are selected.',
+      'user-c5-title': 'AI Builds the Response (Gemini)',
+      'user-c5-body':  'Chunks + question sent to Gemini with instruction:',
+      'user-c5-hl':    '"Answer ONLY based on the provided context."',
+      'user-c5-never': 'The AI <span class="hi">never makes things up</span> — if it\'s not in the ITs, it says it couldn\'t find it.',
+      'user-c6-title': 'Clear and Traceable Response',
+      'user-c6-body':  'Formatted with steps, lists and highlights.',
+      'user-c6-hl':    '🔍 <strong>"View sources"</strong> shows exactly which IT chunks were used.',
+      'user-c7-title': 'Operator',
+      'user-c7-body':  'Continues the conversation, uses FAQ shortcuts.',
+      'user-c8-title': 'BPE — Analytics Panel - Admin User',
+      'user-c8-b1':    'Access and questions per user',
+      'user-c8-b2':    'Most frequent team questions',
+      'user-c8-b3':    'CSV export for Pareto chart',
+      'user-final-title': 'Question answered based on official Work Instructions',
+      'user-final-body':  'No searching through folders, no calling another department, no waiting for an available colleague.',
+      'infra-h1':    'Chatbot CEVA &amp; Logitech — Infrastructure',
+      'infra-sub':   'Machine · Network · Libraries · Indexing Pipeline · Query Flow',
+      'infra-net-lbl': '🌐 Network Diagram — HTTP/S Request Flow to Gemini (Wired Network)',
+      'infra-totem-title': '🖥️ Workstation',
+      'infra-totem-os':    'Windows 10/11',
+      'infra-totem-app':   'Python App',
+      'infra-arrow1-top':  '🔌 Ceva-Corporate',
+      'infra-arrow1-bot':  'Ethernet — Wired Network',
+      'infra-return1':     '← JSON Response',
+      'infra-switch-sub':  'Ceva-Corporate',
+      'infra-arrow2-bot':  'HTTPS / TLS 1.3',
+      'infra-return2':     '← JSON Response',
+      'infra-internet':    'Internet',
+      'infra-internet-ip': 'Public IP',
+      'infra-arrow3-bot':  'generativelanguage\n.googleapis.com',
+      'infra-return3':     '← Gemini Response',
+      'infra-gemini-sub':  'Google Cloud',
+      'infra-tbl1-title':  '🖥️ MACHINE &amp; NETWORK',
+      'infra-tbl1-r1a': 'Machine',   'infra-tbl1-r1b': 'Corporate desktop (Workstation)',
+      'infra-tbl1-r2a': 'OS',
+      'infra-tbl1-r3a': 'Network',   'infra-tbl1-r3b': 'Wired <strong>Ceva-Corporate</strong>',
+      'infra-tbl1-r4a': 'Standard',  'infra-tbl1-r4b': 'Ethernet 1Gbps (Cat5e/Cat6)',
+      'infra-tbl2-title': '🔌 PORTS &amp; PROTOCOLS',
+      'infra-tbl2-r1a': 'Outbound',
+      'infra-tbl2-r2a': 'App Protocol',
+      'infra-tbl2-r3a': 'Encryption',
+      'infra-tbl2-r4a': 'Destination',
+      'infra-tbl3-title': '📦 WHAT IS TRANSMITTED',
+      'infra-tbl3-yes1': '✓ User question (text)',
+      'infra-tbl3-yes2': '✓ 7 IT chunks (text)',
+      'infra-tbl3-yes3': '✓ Recent conversation history (text)',
+      'infra-tbl3-no1':  '✗ Full documents',
+      'infra-tbl3-no2':  '✗ Credentials / database',
+      'infra-tbl3-no3':  '✗ Logs / vector indexes',
+      'infra-local-lbl': '🟢 Local perimeter — everything processed on the machine',
+      'infra-mach-title': '🖥️ Corporate Desktop Workstation — Blue collar users (no corporate email)',
+      'infra-wifi-title': 'Network Connectivity — Corporate Wired Network',
+      'infra-wifi-desc':  'The workstation connects to the internet exclusively via the wired corporate network <span class="wifi-ssid">Ceva-Corporate</span>. This connection is only used to send queries to Gemini (HTTPS outbound). All local processing — document reading, search, authentication — occurs without using the network.',
+      'infra-folder-title': 'Application Data Folder',
+      'infra-folder-desc':  'SQLite database, vector index, model cache and ITs — all saved locally in this hidden Windows folder.',
+      'infra-python-title': '🐍 Python and Main Libraries',
+      'infra-lib-pw':  'Creates the chatbot graphical interface in the browser',
+      'infra-lib-st':  'Transforms text into numerical vectors for semantic search',
+      'infra-lib-fc':  'Vector search engine — finds the most relevant chunks quickly',
+      'infra-lib-bm':  'Exact word search — ideal for acronyms and codes (NF-e, SAP, WMS)',
+      'infra-lib-ga':  'Connector with the Gemini API — sends the question and receives the response',
+      'infra-lib-sq':  'Local database for users, logs and encrypted passwords',
+      'infra-intelex-title': 'Document Source — Intelex → Local Folder',
+      'infra-int-1': 'Access <strong>Intelex</strong> and locate the Work Instructions (ITs) for the desired sector.',
+      'infra-int-2': 'Export/save each IT as a <strong>.txt</strong> file (plain text, no complex formatting).',
+      'infra-int-3': 'The administrator, logged in with <strong>Admin</strong> profile, must open the ChatBot interface and click <strong>"Load Files"</strong>. The selected documents will be automatically stored in the application\'s <strong>AppData</strong> folder.',
+      'infra-int-4': 'During the first setup, uploaded files are <strong>automatically indexed</strong> to create the knowledge base. If documents are updated or added, the administrator must re-upload through the interface so the system performs <strong>re-indexing</strong>.',
+      'infra-rag-lbl':    '⚙️ RAG Pipeline — Indexing (runs only on first load)',
+      'infra-rag-s1-title': 'File Reading',
+      'infra-rag-s1-desc':  'All .txt files in the folder are read and identified by filename',
+      'infra-rag-s2-title': 'Chunk Splitting',
+      'infra-rag-s2-desc':  'Each document is cut into smaller blocks with slight overlap — to avoid losing context at the edges',
+      'infra-rag-s2-note':  '▓ = overlap between blocks',
+      'infra-rag-s3-title': 'Vector Conversion',
+      'infra-rag-s3-desc':  'Each chunk is transformed into a set of numbers representing its "meaning" — processed 100% locally by the MiniLM model',
+      'infra-rag-s4-title': 'Semantic Search Index (FAISS)',
+      'infra-rag-s4-desc':  'Vectors are organized into a local index that enables instant similarity searches',
+      'infra-rag-s5-title': 'Keyword Search Index (BM25)',
+      'infra-rag-s5-desc':  'A second index for exact term search — ensures acronyms and technical codes are always found',
+      'infra-qf-lbl':    '🔍 Query Flow — For each user question',
+      'infra-qf-s1-title': 'User Question',
+      'infra-qf-s1-desc':  'Text typed in the interface → converted to a vector locally for semantic comparison',
+      'infra-qf-s2-title': 'Dual Search',
+      'infra-qf-s2-desc':  '<strong>By meaning</strong> (FAISS): finds chunks with similar context<br><strong>By words</strong> (BM25): finds chunks with the same terms',
+      'infra-qf-s3-title': 'Best Chunks Selection',
+      'infra-qf-s3-desc':  'Results from both searches are combined and the most relevant and varied are selected — avoiding repetition',
+      'infra-qf-s3-badge': '→ 7 final chunks selected ←',
+      'infra-qf-s4-title': 'Gemini 2.5 Flash',
+      'infra-qf-s4-desc':  'Receives <strong>only</strong>: question + 7 chunks + recent conversation history<br>Via wired network <strong>Ceva-Corporate</strong> → Google API (HTTPS)',
+      'infra-qf-s5-title': 'Response to User',
+      'infra-qf-s5-desc':  'Text formatted with steps and highlights<br>Sources indicated (file + chunk)<br>History saved locally',
+      'infra-outtag': '🔐 Full documents, database, indexes and models <strong>never leave the machine</strong> — only the 7 selected chunks + question are sent via HTTPS over the wired Ceva-Corporate network',
+      'ger-h1':  'Chatbot CEVA &amp; Logitech — Management View',
+      'ger-sub': 'How the solution works · For managers and IT team · No technical jargon',
+      'ger-b0-label': 'Network connectivity',
+      'ger-b0-title': 'The workstation uses the wired corporate network <strong>Ceva-Corporate</strong> to communicate with the AI',
+      'ger-b0-desc':  'All internal processing — document reading, text search, user login and history saving — happens inside the machine itself, without using the network. The wired connection is used exclusively when sending the question to Gemini (Google) and receiving the response',
+      'ger-b0-tip':   '🔒 No information travels through the corporate network beyond the controlled submission to Gemini. The wired network <strong>Ceva-Corporate</strong> is the only data exit path for the application.',
+      'ger-b1-label': 'Deployment architecture',
+      'ger-b1-title': 'Locally installed solution — no dependency on external servers or proprietary cloud infrastructure',
+      'ger-b1-desc':  'The tool runs directly on the workstation, operating autonomously. No dedicated server required. All processing — document reading, search index generation, user authentication and history storage — occurs within the machine itself.',
+      'ger-b1-tip':   '📁 All application assets (documents, database, search index and encrypted credentials) reside in a dedicated folder in the workstation\'s OS — ensuring full traceability and control by the IT team.',
+      'ger-b2-label': 'Operational knowledge base',
+      'ger-b2-title': 'The chatbot is powered exclusively by official Work Instructions (ITs) — no external content or freely generated AI content',
+      'ger-b2-desc':  'ITs are exported from <strong>Intelex</strong> and loaded by the responsible administrator. The system then builds a <strong>search index locally</strong> over these documents — capable of finding information by context and intent, not just exact keywords. This ensures all responses are traceable to an official document.',
+      'ger-b2-tip':   '🔄 Knowledge base updates are on-demand: when an IT is revised in Intelex, simply replace the file and reload the folder. The system automatically reprocesses only the changed documents.',
+      'ger-b3-label': 'Response retrieval and generation mechanism',
+      'ger-b3-title': 'The AI does not respond based on generic knowledge — it is instructed to answer only with what is in the loaded ITs',
+      'ger-b3-desc':  'Upon receiving a question, the system performs an <strong>intelligent search</strong> across all documents and selects only the chunks most relevant to the query context. These chunks — and only them — are sent to the language model (Gemini, Google) together with the user\'s question, with explicit instruction to respond exclusively based on the provided material.',
+      'ger-b3-tip':   '✅ This mechanism eliminates the risk of AI-invented responses — ensuring all information delivered to the operator is auditable and traced to an official source.',
+      'ger-flow-title': 'Query cycle — from operator to traceable response',
+      'ger-f1-title': 'Operator query',
+      'ger-f1-desc':  'The user formulates the question in natural language, without needing to know the document structure',
+      'ger-f2-title': 'Contextual retrieval',
+      'ger-f2-desc':  'The system locates, among all ITs, the <strong>semantically most relevant chunks</strong> to the query — by meaning, not just exact word match',
+      'ger-f3-title': 'Controlled AI submission',
+      'ger-f3-desc':  'Only the selected chunks + question are transmitted to Gemini via wired network <strong>Ceva-Corporate</strong> — no full document travels',
+      'ger-f4-title': 'AI synthesis',
+      'ger-f4-desc':  'Gemini builds a clear and objective response, <strong>limited to the provided context</strong> — no extrapolation or unreferenced content',
+      'ger-f5-title': 'Traceable response',
+      'ger-f5-desc':  'The operator receives the response with indication of the <strong>documentary sources used</strong>, preserving the traceability chain',
+      'ger-b4-label': 'AI governance',
+      'ger-b4-title': 'Gemini acts as a language engine — not as a data repository or decision maker',
+      'ger-b4-desc':  'Google\'s language model is used exclusively for the <strong>synthesis and formatting step</strong>. It does not receive the full document base, has no access to the user database, does not store conversation history and is not consulted for any purpose other than drafting the response from the locally pre-filtered context. The Google account used operates under a <strong>no data retention policy</strong>.',
+      'ger-b4-tip':   '🔐 Control over what is sent to the AI is exercised entirely by the local system. Transmission occurs via wired corporate network <strong>Ceva-Corporate</strong> using HTTPS protocol.',
+      'ger-privacy-title': 'Compliance and data sovereignty summary',
+      'ger-privacy-desc':  '<strong>Data that remains exclusively in the local environment:</strong> complete document base (ITs), user database, conversation history, search index and access credentials (stored with SHA-256 cryptographic hash).<br><br><strong>Data transmitted externally:</strong> only the user query combined with the selected document chunks, transmitted via wired network <strong>Ceva-Corporate</strong> → HTTPS protocol to the Google Gemini API.<br><br>The architecture was deliberately designed to <strong>minimize data exposure surface</strong>, maintaining operational sovereignty over the knowledge base and compliance with corporate privacy policies.',
+    },
+    es: {
+      'nav-infra':     '🖥️ Infraestructura',
+      'nav-tech':      '🔄 Flujo de Datos',
+      'nav-gerencial': '📋 Visión Gerencial',
+      'nav-user':      '👤 Visión del Usuario',
+      'cv-badge':    'Documentación del proyecto',
+      'cv-title':    'ChatBot Asistente',
+      'cv-subtitle': 'Arquitectura · Infraestructura · Flujo de Datos · Experiencia del Usuario',
+      'cv-meta-0':   'Solución 100% local',
+      'cv-meta-1':   'Pipeline RAG Híbrido',
+      'cv-meta-2':   'Motor Gemini 2.5 Flash',
+      'cv-meta-3':   'Base de Conocimiento: ITs Intelex',
+      'cv-enter':    'Acceder al Proyecto',
+      'tech-h1':         'Chatbot CEVA &amp; Logitech — Flujo de Datos',
+      'tech-sub':        'Qué queda local · Qué sale',
+      'tech-local-lbl':  '🟢 Perímetro local — interfaz gráfica y base de datos',
+      'tech-c1-title':   'Instalación Local — Estación de Trabajo',
+      'tech-c1-b1':      'Programa Python instalado <span class="hi">directamente en la estación</span> — se ejecuta 100% local',
+      'tech-c1-b2':      'Python vía <span class="hi">PortalCompany</span> — instalación homologada',
+      'tech-c1-b3':      'Librerías pip dentro de la <span class="hi">política corporativa</span>',
+      'tech-c1-b4':      'App <span class="hi">escritorio nativa</span>',
+      'tech-c1-b5':      'Usuarios destino: <span class="hi">Obreros (sin correo corporativo)</span>',
+      'tech-c2-title':   'Autenticación (RBAC)',
+      'tech-c2-b1':      'Interfaz gráfica con pantalla de <span class="hi">registro, login y contraseña</span>',
+      'tech-c2-b2':      'Sugerencia de <span class="hi">contraseña fuerte</span> al registrar nuevos usuarios',
+      'tech-c2-b3':      '≥ 8 caracteres • A–Z • 0–9 • carácter especial (!@#$…)',
+      'tech-c2-b4':      'Contraseñas almacenadas con <span class="hi">hash SHA-256</span>',
+      'tech-c2-b5':      'Perfiles: <span class="hi">Operador</span> y <span class="hi">BPE</span>',
+      'tech-c3-title':   'Auditoría (SQLite — base de datos local)',
+      'tech-c3-b1':      'Base de datos SQLite almacenada <span class="hi">en la propia estación</span> — no circula por la red',
+      'tech-c3-b2':      'Todos los accesos y preguntas registrados localmente',
+      'tech-c3-b3':      'Trazabilidad completa: quién, qué, cuándo...',
+      'tech-c4-title':   'Documentos de Operación (ITs)',
+      'tech-c4-b1':      'Archivos .txt cargados desde carpeta local — <span class="hi">ningún archivo se envía externamente</span>',
+      'tech-c4-b2':      'Procesamiento vía RAG en Python: generación de <span class="hi">embeddings e índice vectorial local</span>',
+      'tech-c4-b3':      'Durante la consulta, el sistema recupera solo <span class="hi">chunks semánticamente relevantes</span>',
+      'tech-c4-b4':      'Solo estos fragmentos se envían a la IA para generar la respuesta',
+      'tech-outtag':     '⚠️ &nbsp;<strong>Único dato enviado a la IA:</strong>&nbsp; pregunta del usuario + fragmentos relevantes de las ITs usados como contexto para generar la respuesta &nbsp;→&nbsp; solicitud HTTPS a la API Gemini (Google) con facturación activa y política de no retención de datos',
+      'tech-ext-lbl':    '🌐 Externo — Google Gemini API (HTTPS saliente)',
+      'tech-c5-title':   'Gemini 2.5 Flash — Generación de Respuesta',
+      'tech-c5-b1':      '<span class="hi">Recibe:</span> pregunta + fragmentos de ITs + historial reciente',
+      'tech-c5-b2':      '<span class="hi">No recibe:</span> documentos completos, credenciales, logs ni datos del sistema',
+      'tech-c5-b3':      'System prompt: <em>responder solo basándose en el contexto proporcionado</em>',
+      'user-h1':     'Chatbot CEVA &amp; Logitech — Visión del Usuario',
+      'user-sub':    'Cómo funciona el sistema en la práctica · Para operadores y equipo BPE',
+      'user-c1-title': 'Login — Usuario Operacional',
+      'user-c1-body':  'Ingresa usuario y contraseña. El sistema valida y libera el acceso según su perfil.',
+      'user-c1-hl':    '👤 Operador → chat<br>📊 BPE → chat + Analytics',
+      'user-c2-title': 'Base de Conocimiento — ITs',
+      'user-c2-body':  'El chatbot se alimenta de los documentos de procedimiento (.txt): recepción, conferencia ciega, NF-e, SAP, WMS, importación, exportación y todo lo documentado.',
+      'user-c2-hl':    '💡 Índice inteligente creado localmente — un "Google interno" de las ITs.',
+      'user-c3-title': 'Usted Hace una Pregunta',
+      'user-c3-body':  'Escribe normalmente:',
+      'user-c3-hl':    '"¿Cómo descargo carga fraccionada?"<br>"¿Cuál es el plazo para cerrar la NF-e?"',
+      'user-c3-ctx':   'El sistema recuerda el contexto de la conversación.',
+      'user-c4-title': 'Búsqueda en Documentos',
+      'user-c4-body':  'Dos búsquedas simultáneas:',
+      'user-c4-b1':    '<span class="hi">Por palabras exactas</span> — siglas, códigos (NF-e, SAP, WMS)',
+      'user-c4-b2':    '<span class="hi">Por significado</span> — entiende la intención de la pregunta',
+      'user-c4-sel':   'Los <span class="hi">7 fragmentos más relevantes</span> son seleccionados.',
+      'user-c5-title': 'IA Elabora la Respuesta (Gemini)',
+      'user-c5-body':  'Fragmentos + pregunta enviados a Gemini con instrucción:',
+      'user-c5-hl':    '"Responde SOLO basándote en el contexto proporcionado."',
+      'user-c5-never': 'La IA <span class="hi">nunca inventa</span> — si no está en las ITs, indica que no encontró.',
+      'user-c6-title': 'Respuesta Clara y Trazable',
+      'user-c6-body':  'Formateada con pasos, listas y destacados.',
+      'user-c6-hl':    '🔍 <strong>"Ver fuentes"</strong> muestra exactamente qué fragmentos de las ITs se usaron.',
+      'user-c7-title': 'Operador',
+      'user-c7-body':  'Continúa la conversación, usa atajos de preguntas frecuentes.',
+      'user-c8-title': 'BPE — Panel Analytics - Usuario Admin',
+      'user-c8-b1':    'Accesos y preguntas por usuario',
+      'user-c8-b2':    'Dudas más frecuentes del equipo',
+      'user-c8-b3':    'Exportación CSV para gráfico de Pareto',
+      'user-final-title': 'Duda resuelta con base en las ITs oficiales',
+      'user-final-body':  'Sin buscar en carpetas, sin llamar a otra área, sin depender de un colega disponible.',
+      'infra-h1':    'Chatbot CEVA &amp; Logitech — Infraestructura',
+      'infra-sub':   'Máquina · Red · Librerías · Pipeline de Indexación · Flujo de Consulta',
+      'infra-net-lbl': '🌐 Diagrama de Red — Flujo de Solicitud HTTP/S a Gemini (Red por Cable)',
+      'infra-totem-title': '🖥️ Estación',
+      'infra-totem-os':    'Windows 10/11',
+      'infra-totem-app':   'Python App',
+      'infra-arrow1-top':  '🔌 Ceva-Corporate',
+      'infra-arrow1-bot':  'Ethernet — Red por Cable',
+      'infra-return1':     '← Respuesta JSON',
+      'infra-switch-sub':  'Ceva-Corporate',
+      'infra-arrow2-bot':  'HTTPS / TLS 1.3',
+      'infra-return2':     '← Respuesta JSON',
+      'infra-internet':    'Internet',
+      'infra-internet-ip': 'IP Público',
+      'infra-arrow3-bot':  'generativelanguage\n.googleapis.com',
+      'infra-return3':     '← Respuesta Gemini',
+      'infra-gemini-sub':  'Google Cloud',
+      'infra-tbl1-title':  '🖥️ MÁQUINA &amp; RED',
+      'infra-tbl1-r1a': 'Máquina',   'infra-tbl1-r1b': 'Escritorio corporativo (Estación)',
+      'infra-tbl1-r2a': 'SO',
+      'infra-tbl1-r3a': 'Red',       'infra-tbl1-r3b': 'Por cable <strong>Ceva-Corporate</strong>',
+      'infra-tbl1-r4a': 'Estándar',  'infra-tbl1-r4b': 'Ethernet 1Gbps (Cat5e/Cat6)',
+      'infra-tbl2-title': '🔌 PUERTOS &amp; PROTOCOLOS',
+      'infra-tbl2-r1a': 'Salida',
+      'infra-tbl2-r2a': 'Protocolo App',
+      'infra-tbl2-r3a': 'Cifrado',
+      'infra-tbl2-r4a': 'Destino',
+      'infra-tbl3-title': '📦 QUÉ SE TRANSMITE',
+      'infra-tbl3-yes1': '✓ Pregunta del usuario (texto)',
+      'infra-tbl3-yes2': '✓ 7 fragmentos de ITs (texto)',
+      'infra-tbl3-yes3': '✓ Historial reciente de la conversación (texto)',
+      'infra-tbl3-no1':  '✗ Documentos completos',
+      'infra-tbl3-no2':  '✗ Credenciales / base de datos',
+      'infra-tbl3-no3':  '✗ Logs / índices vectoriales',
+      'infra-local-lbl': '🟢 Perímetro local — todo procesado en la propia máquina',
+      'infra-mach-title': '🖥️ Escritorio Corporativo (Estación) — Usuarios obreros (sin correo corporativo)',
+      'infra-wifi-title': 'Conectividad de Red — Red Corporativa por Cable',
+      'infra-wifi-desc':  'La estación se conecta a internet exclusivamente mediante la red corporativa por cable <span class="wifi-ssid">Ceva-Corporate</span>. Esta conexión se usa solo para enviar consultas a Gemini (HTTPS saliente). Todo el procesamiento local — lectura de documentos, búsqueda, autenticación — ocurre sin usar la red.',
+      'infra-folder-title': 'Carpeta de Datos de la Aplicación',
+      'infra-folder-desc':  'Base SQLite, índice vectorial, caché del modelo e ITs — todo guardado localmente en esta carpeta oculta de Windows.',
+      'infra-python-title': '🐍 Python y Librerías Principales',
+      'infra-lib-pw':  'Crea la interfaz gráfica del chatbot en el navegador',
+      'infra-lib-st':  'Transforma textos en vectores numéricos para búsqueda semántica',
+      'infra-lib-fc':  'Motor de búsqueda vectorial — encuentra los fragmentos más relevantes rápidamente',
+      'infra-lib-bm':  'Búsqueda por palabras exactas — ideal para siglas y códigos (NF-e, SAP, WMS)',
+      'infra-lib-ga':  'Conector con la API de Gemini — envía la pregunta y recibe la respuesta',
+      'infra-lib-sq':  'Base de datos local de usuarios, logs y contraseñas cifradas',
+      'infra-intelex-title': 'Origen de Documentos — Intelex → Carpeta Local',
+      'infra-int-1': 'Acceda a <strong>Intelex</strong> y localice las Instrucciones de Trabajo (ITs) del sector deseado.',
+      'infra-int-2': 'Exporte/guarde cada IT como archivo <strong>.txt</strong> (texto plano, sin formato complejo).',
+      'infra-int-3': 'El administrador, conectado con perfil <strong>Admin</strong>, debe abrir la interfaz del ChatBot y hacer clic en <strong>"Cargar Archivos"</strong>. Los documentos seleccionados se almacenarán automáticamente en la carpeta <strong>AppData</strong> de la aplicación.',
+      'infra-int-4': 'Durante la primera configuración, los archivos subidos se <strong>indexan automáticamente</strong> para crear la base de conocimiento. Si se actualizan o agregan documentos, el administrador debe volver a subirlos para que el sistema ejecute la <strong>reindexación</strong>.',
+      'infra-rag-lbl':    '⚙️ Pipeline RAG — Indexación (se ejecuta solo en la primera carga)',
+      'infra-rag-s1-title': 'Lectura de archivos',
+      'infra-rag-s1-desc':  'Todos los .txt de la carpeta se leen e identifican por nombre de archivo',
+      'infra-rag-s2-title': 'División en Fragmentos',
+      'infra-rag-s2-desc':  'Cada documento se divide en bloques más pequeños con leve superposición — para no perder contexto en los bordes',
+      'infra-rag-s2-note':  '▓ = superposición entre bloques',
+      'infra-rag-s3-title': 'Conversión en Vectores',
+      'infra-rag-s3-desc':  'Cada fragmento se transforma en un conjunto de números que representa su "significado" — procesado 100% localmente por el modelo MiniLM',
+      'infra-rag-s4-title': 'Índice de Búsqueda Semántica (FAISS)',
+      'infra-rag-s4-desc':  'Los vectores se organizan en un índice local que permite búsquedas instantáneas por similitud semántica',
+      'infra-rag-s5-title': 'Índice de Búsqueda por Palabras (BM25)',
+      'infra-rag-s5-desc':  'Un segundo índice para búsqueda de términos exactos — garantiza que siglas y códigos técnicos siempre se encuentren',
+      'infra-qf-lbl':    '🔍 Flujo de Consulta — Por cada pregunta del usuario',
+      'infra-qf-s1-title': 'Pregunta del Usuario',
+      'infra-qf-s1-desc':  'Texto escrito en la interfaz → convertido en vector localmente para comparación semántica',
+      'infra-qf-s2-title': 'Búsqueda Doble',
+      'infra-qf-s2-desc':  '<strong>Por significado</strong> (FAISS): encuentra fragmentos con contexto similar<br><strong>Por palabras</strong> (BM25): encuentra fragmentos con los mismos términos',
+      'infra-qf-s3-title': 'Selección de Mejores Fragmentos',
+      'infra-qf-s3-desc':  'Los resultados de ambas búsquedas se combinan y los más relevantes y variados se seleccionan — evitando repetición',
+      'infra-qf-s3-badge': '→ 7 fragmentos finales seleccionados ←',
+      'infra-qf-s4-title': 'Gemini 2.5 Flash',
+      'infra-qf-s4-desc':  'Recibe <strong>solo</strong>: pregunta + 7 fragmentos + historial reciente<br>Vía red por cable <strong>Ceva-Corporate</strong> → API Google (HTTPS)',
+      'infra-qf-s5-title': 'Respuesta al Usuario',
+      'infra-qf-s5-desc':  'Texto formateado con pasos y destacados<br>Fuentes indicadas (archivo + fragmento)<br>Historial guardado localmente',
+      'infra-outtag': '🔐 Documentos completos, base de datos, índices y modelos <strong>nunca salen de la máquina</strong> — solo los 7 fragmentos seleccionados + pregunta se envían vía HTTPS por la red por cable Ceva-Corporate',
+      'ger-h1':  'Chatbot CEVA &amp; Logitech — Visión Gerencial',
+      'ger-sub': 'Cómo funciona la solución · Para gestores y equipo de TI · Sin jerga técnica',
+      'ger-b0-label': 'Conectividad de red',
+      'ger-b0-title': 'La estación usa la red corporativa por cable <strong>Ceva-Corporate</strong> para comunicarse con la IA',
+      'ger-b0-desc':  'Todo el procesamiento interno — lectura de documentos, búsqueda, login de usuarios y guardado del historial — ocurre dentro de la propia máquina, sin necesitar la red. La conexión por cable se usa exclusivamente al enviar la pregunta a Gemini (Google) y recibir la respuesta.',
+      'ger-b0-tip':   '🔒 Ninguna información circula por la red corporativa más allá del envío controlado a Gemini. La red por cable <strong>Ceva-Corporate</strong> es el único camino de salida de datos de la aplicación.',
+      'ger-b1-label': 'Arquitectura de despliegue',
+      'ger-b1-title': 'Solución instalada localmente — sin dependencia de servidores externos ni infraestructura cloud propia',
+      'ger-b1-desc':  'La herramienta se ejecuta directamente en la estación de trabajo, operando de forma autónoma. No requiere servidor dedicado. Todo el procesamiento ocurre dentro de la propia máquina.',
+      'ger-b1-tip':   '📁 Todos los activos de la aplicación residen en una carpeta dedicada en el SO de la estación — garantizando trazabilidad y control total por el equipo de TI.',
+      'ger-b2-label': 'Base de conocimiento operacional',
+      'ger-b2-title': 'El chatbot se alimenta exclusivamente de las Instrucciones de Trabajo (ITs) oficiales — sin contenido externo ni generado libremente por la IA',
+      'ger-b2-desc':  'Las ITs se exportan de <strong>Intelex</strong> y las carga el administrador responsable. El sistema construye un <strong>índice de búsqueda localmente</strong> sobre estos documentos — capaz de localizar información por contexto e intención.',
+      'ger-b2-tip':   '🔄 La actualización de la base es bajo demanda: cuando se revise una IT en Intelex, basta sustituir el archivo y recargar la carpeta.',
+      'ger-b3-label': 'Mecanismo de recuperación y generación de respuestas',
+      'ger-b3-title': 'La IA no responde basándose en conocimiento genérico — se le instruye a responder solo con lo que está en las ITs cargadas',
+      'ger-b3-desc':  'Al recibir una pregunta, el sistema realiza una <strong>búsqueda inteligente</strong> y selecciona solo los fragmentos más relevantes. Estos fragmentos — y solo ellos — se envían al modelo de lenguaje junto a la pregunta del usuario.',
+      'ger-b3-tip':   '✅ Este mecanismo elimina el riesgo de respuestas inventadas por la IA.',
+      'ger-flow-title': 'Ciclo de una consulta — del operador a la respuesta trazable',
+      'ger-f1-title': 'Consulta del operador',
+      'ger-f1-desc':  'El usuario formula la duda en lenguaje natural, sin necesidad de conocer la estructura de los documentos',
+      'ger-f2-title': 'Recuperación contextual',
+      'ger-f2-desc':  'El sistema localiza los <strong>fragmentos semánticamente más relevantes</strong> a la consulta — por significado, no solo por coincidencia exacta',
+      'ger-f3-title': 'Envío controlado a la IA',
+      'ger-f3-desc':  'Solo los fragmentos seleccionados + la pregunta se transmiten a Gemini vía red por cable <strong>Ceva-Corporate</strong>',
+      'ger-f4-title': 'Síntesis por la IA',
+      'ger-f4-desc':  'Gemini estructura una respuesta clara, <strong>circunscrita al contexto proporcionado</strong> — sin extrapolación',
+      'ger-f5-title': 'Respuesta trazable',
+      'ger-f5-desc':  'El operador recibe la respuesta con indicación de las <strong>fuentes documentales utilizadas</strong>',
+      'ger-b4-label': 'Gobernanza del uso de Inteligencia Artificial',
+      'ger-b4-title': 'Gemini actúa como motor de lenguaje — no como repositorio de datos ni tomador de decisiones',
+      'ger-b4-desc':  'El modelo de lenguaje de Google se usa exclusivamente para la etapa de <strong>síntesis y formateo de la respuesta</strong>. No recibe la base documental completa ni almacena historial. La cuenta Google opera bajo <strong>política de no retención de datos</strong>.',
+      'ger-b4-tip':   '🔐 El control de lo que se envía a la IA es ejercido íntegramente por el sistema local. La transmisión ocurre vía red por cable <strong>Ceva-Corporate</strong> usando protocolo HTTPS.',
+      'ger-privacy-title': 'Síntesis de conformidad y soberanía de datos',
+      'ger-privacy-desc':  '<strong>Datos que permanecen exclusivamente en el entorno local:</strong> base documental completa (ITs), base de datos de usuarios, historial de conversaciones, índice de búsqueda y credenciales de acceso (almacenadas con hash SHA-256).<br><br><strong>Datos transmitidos externamente:</strong> únicamente la consulta del usuario más los fragmentos documentales seleccionados, transmitidos vía red por cable <strong>Ceva-Corporate</strong> → protocolo HTTPS a la API de Google Gemini.<br><br>La arquitectura fue diseñada deliberadamente para <strong>minimizar la superficie de exposición de datos</strong>.',
+    }
+  };
+
+  // ═══════════════════════════════════════════════════
+  // APPLY TRANSLATION — uses data-i18n attributes
+  // ═══════════════════════════════════════════════════
+  function setLang(lang) {
+    currentLang = lang;
+    var t = T[lang];
+
+    function set(sel, key, html) {
+      var el = document.querySelector(sel);
+      if (!el || !t[key]) return;
+      if (html) el.innerHTML = t[key]; else el.textContent = t[key];
+    }
+    function setAll(sel, key, html) {
+      document.querySelectorAll(sel).forEach(function(el){ if(t[key]) { if(html) el.innerHTML=t[key]; else el.textContent=t[key]; }});
+    }
+    function li(ul, idx, key) {
+      var items = ul ? ul.querySelectorAll('li') : [];
+      if (items[idx] && t[key]) items[idx].innerHTML = t[key];
+    }
+
+    // ── Nav buttons
+    document.getElementById('btn-infra').innerHTML     = t['nav-infra'];
+    document.getElementById('btn-tech').innerHTML      = t['nav-tech'];
+    document.getElementById('btn-gerencial').innerHTML = t['nav-gerencial'];
+    document.getElementById('btn-user').innerHTML      = t['nav-user'];
+
+    // ── Cover
+    var badge = document.querySelector('.cv-badge');
+    if (badge) badge.innerHTML = '<div class="cv-badge-dot"></div>' + t['cv-badge'];
+    set('.cv-title',    'cv-title');
+    set('.cv-subtitle', 'cv-subtitle');
+    var enterBtn = document.querySelector('.cv-enter-btn');
+    if (enterBtn) enterBtn.innerHTML = t['cv-enter'] + ' <span class="arr">→</span>';
+    var metas = document.querySelectorAll('.cv-meta-item');
+    [0,1,2,3].forEach(function(i){ if(metas[i] && t['cv-meta-'+i]) { var dot=metas[i].querySelector('.dot'); metas[i].innerHTML=''; if(dot) metas[i].appendChild(dot); metas[i].appendChild(document.createTextNode(t['cv-meta-'+i])); }});
+
+    // ── Tech view
+    var tv = document.getElementById('view-tech');
+    if (tv) {
+      tv.querySelector('.title h1').innerHTML = t['tech-h1'] || '';
+      tv.querySelector('.title p').textContent = t['tech-sub'] || '';
+      tv.querySelector('.p-local-lbl').textContent = t['tech-local-lbl'] || '';
+      var tc = tv.querySelectorAll('.card-title');
+      if(tc[0]) tc[0].textContent = t['tech-c1-title']||'';
+      if(tc[1]) tc[1].textContent = t['tech-c2-title']||'';
+      if(tc[2]) tc[2].textContent = t['tech-c3-title']||'';
+      if(tc[3]) tc[3].textContent = t['tech-c4-title']||'';
+      if(tc[4]) tc[4].textContent = t['tech-c5-title']||'';
+      var tuls = tv.querySelectorAll('.card-body ul');
+      if(tuls[0]){ li(tuls[0],0,'tech-c1-b1'); li(tuls[0],1,'tech-c1-b2'); li(tuls[0],2,'tech-c1-b3'); li(tuls[0],3,'tech-c1-b4'); li(tuls[0],4,'tech-c1-b5'); }
+      if(tuls[1]){ li(tuls[1],0,'tech-c2-b1'); li(tuls[1],1,'tech-c2-b2'); li(tuls[1],2,'tech-c2-b3'); li(tuls[1],3,'tech-c2-b4'); li(tuls[1],4,'tech-c2-b5'); }
+      if(tuls[2]){ li(tuls[2],0,'tech-c3-b1'); li(tuls[2],1,'tech-c3-b2'); li(tuls[2],2,'tech-c3-b3'); }
+      if(tuls[3]){ li(tuls[3],0,'tech-c4-b1'); li(tuls[3],1,'tech-c4-b2'); li(tuls[3],2,'tech-c4-b3'); li(tuls[3],3,'tech-c4-b4'); }
+      if(tuls[4]){ li(tuls[4],0,'tech-c5-b1'); li(tuls[4],1,'tech-c5-b2'); li(tuls[4],2,'tech-c5-b3'); }
+      var ot = tv.querySelector('.out-tag'); if(ot && t['tech-outtag']) ot.innerHTML = t['tech-outtag'];
+      var el = tv.querySelector('.p-ext-lbl'); if(el && t['tech-ext-lbl']) el.textContent = t['tech-ext-lbl'];
+    }
+
+    // ── User view
+    var uv = document.getElementById('view-user');
+    if (uv) {
+      uv.querySelector('.title h1').innerHTML = t['user-h1'] || '';
+      uv.querySelector('.title p').textContent = t['user-sub'] || '';
+      var uc = uv.querySelectorAll('.card-title');
+      if(uc[0]) uc[0].textContent = t['user-c1-title']||'';
+      if(uc[1]) uc[1].textContent = t['user-c2-title']||'';
+      if(uc[2]) uc[2].textContent = t['user-c3-title']||'';
+      if(uc[3]) uc[3].textContent = t['user-c4-title']||'';
+      if(uc[4]) uc[4].textContent = t['user-c5-title']||'';
+      if(uc[5]) uc[5].textContent = t['user-c6-title']||'';
+      if(uc[6]) uc[6].textContent = t['user-c7-title']||'';
+      if(uc[7]) uc[7].textContent = t['user-c8-title']||'';
+      var ucb = uv.querySelectorAll('.card-body');
+      if(ucb[0] && t['user-c1-body']) { var hl0=ucb[0].querySelector('.u-hl'); ucb[0].innerHTML=t['user-c1-body']; if(hl0&&t['user-c1-hl']){var h=document.createElement('div');h.className='u-hl';h.style.marginTop='8px';h.innerHTML=t['user-c1-hl'];ucb[0].appendChild(h);} }
+      if(ucb[1] && t['user-c2-body']) { ucb[1].innerHTML=t['user-c2-body']; var h=document.createElement('div');h.className='u-hl';h.style.marginTop='8px';h.textContent=t['user-c2-hl']||'';ucb[1].appendChild(h); }
+      if(ucb[2] && t['user-c3-body']) { ucb[2].innerHTML=t['user-c3-body']; var h=document.createElement('div');h.className='u-hl';h.style.marginTop='8px;font-style:italic';h.innerHTML=t['user-c3-hl']||'';ucb[2].appendChild(h); var p=document.createElement('p');p.style.marginTop='6px';p.textContent=t['user-c3-ctx']||'';ucb[2].appendChild(p); }
+      if(ucb[3] && t['user-c4-body']) { var uul3=ucb[3].querySelector('ul'); ucb[3].innerHTML=t['user-c4-body']; var ul=document.createElement('ul'); var l1=document.createElement('li');l1.innerHTML=t['user-c4-b1']||'';ul.appendChild(l1); var l2=document.createElement('li');l2.innerHTML=t['user-c4-b2']||'';ul.appendChild(l2); ucb[3].appendChild(ul); var sp=document.createElement('p');sp.style.marginTop='6px';sp.innerHTML=t['user-c4-sel']||'';ucb[3].appendChild(sp); }
+      if(ucb[4] && t['user-c5-body']) { ucb[4].innerHTML=t['user-c5-body']; var h=document.createElement('div');h.className='u-hl';h.style.cssText='margin-top:8px';h.innerHTML='<em>'+t['user-c5-hl']+'</em>';ucb[4].appendChild(h); var p=document.createElement('p');p.style.marginTop='6px';p.innerHTML=t['user-c5-never']||'';ucb[4].appendChild(p); }
+      if(ucb[5] && t['user-c6-body']) { ucb[5].innerHTML=t['user-c6-body']; var h=document.createElement('div');h.className='u-hl-g';h.style.marginTop='8px';h.innerHTML=t['user-c6-hl']||'';ucb[5].appendChild(h); }
+      if(ucb[6] && t['user-c7-body']) ucb[6].textContent = t['user-c7-body'];
+      if(ucb[7]) { var uuls=ucb[7].querySelectorAll('li'); if(uuls[0])uuls[0].textContent=t['user-c8-b1']||''; if(uuls[1])uuls[1].textContent=t['user-c8-b2']||''; if(uuls[2])uuls[2].textContent=t['user-c8-b3']||''; }
+      var uft = uv.querySelector('.card-title[style*="16a34a"]'); if(uft&&t['user-final-title']) uft.textContent=t['user-final-title'];
+      var ufb = uv.querySelector('.card-body[style*="text-align:center"]'); if(ufb&&t['user-final-body']) ufb.textContent=t['user-final-body'];
+    }
+
+    // ── Infra view
+    var iv = document.getElementById('view-infra');
+    if (iv) {
+      iv.querySelector('.title h1').innerHTML = t['infra-h1'] || '';
+      iv.querySelector('.title p').textContent = t['infra-sub'] || '';
+      // network diagram label
+      var netlbl = iv.querySelectorAll('[style*="top:-11px"]')[0]; if(netlbl&&t['infra-net-lbl']) netlbl.textContent=t['infra-net-lbl'];
+
+      // Tabelas do diagrama de rede (Máquina, Portas, O que trafega)
+      var t1 = iv.querySelector('[style*="border:1.5px solid #dcfce7"]');
+      if(t1) {
+        if(t['infra-tbl1-title']) t1.children[0].textContent = t['infra-tbl1-title'];
+        var td1 = t1.querySelectorAll('td');
+        if(td1.length > 0) {
+          if(td1[0] && t['infra-tbl1-r1a']) td1[0].textContent = t['infra-tbl1-r1a'];
+          if(td1[1] && t['infra-tbl1-r1b']) td1[1].textContent = t['infra-tbl1-r1b'];
+          if(td1[2] && t['infra-tbl1-r2a']) td1[2].textContent = t['infra-tbl1-r2a'];
+          if(td1[4] && t['infra-tbl1-r3a']) td1[4].textContent = t['infra-tbl1-r3a'];
+          if(td1[5] && t['infra-tbl1-r3b']) td1[5].innerHTML   = t['infra-tbl1-r3b'];
+          if(td1[6] && t['infra-tbl1-r4a']) td1[6].textContent = t['infra-tbl1-r4a'];
+          if(td1[7] && t['infra-tbl1-r4b']) td1[7].textContent = t['infra-tbl1-r4b'];
+        }
+      }
+      var t2 = iv.querySelector('[style*="border:1.5px solid #dbeafe"]');
+      if(t2) {
+        if(t['infra-tbl2-title']) t2.children[0].textContent = t['infra-tbl2-title'];
+        var td2 = t2.querySelectorAll('td');
+        if(td2.length > 0) {
+          if(td2[0] && t['infra-tbl2-r1a']) td2[0].textContent = t['infra-tbl2-r1a'];
+          if(td2[2] && t['infra-tbl2-r2a']) td2[2].textContent = t['infra-tbl2-r2a'];
+          if(td2[4] && t['infra-tbl2-r3a']) td2[4].textContent = t['infra-tbl2-r3a'];
+          if(td2[6] && t['infra-tbl2-r4a']) td2[6].textContent = t['infra-tbl2-r4a'];
+        }
+      }
+      var t3 = iv.querySelector('[style*="border:1.5px solid #fde68a"]');
+      if(t3) {
+        if(t['infra-tbl3-title']) t3.children[0].textContent = t['infra-tbl3-title'];
+        var items3 = t3.children[1].children;
+        if(t['infra-tbl3-yes1']) items3[0].textContent = t['infra-tbl3-yes1'];
+        if(t['infra-tbl3-yes2']) items3[1].textContent = t['infra-tbl3-yes2'];
+        if(t['infra-tbl3-yes3']) items3[2].textContent = t['infra-tbl3-yes3'];
+        if(t['infra-tbl3-no1'])  items3[3].textContent = t['infra-tbl3-no1'];
+        if(t['infra-tbl3-no2'])  items3[4].textContent = t['infra-tbl3-no2'];
+        if(t['infra-tbl3-no3'])  items3[5].textContent = t['infra-tbl3-no3'];
+      }
+
+      // machine/rede/bibliotecas section label
+      var plbl = iv.querySelector('.p-local-lbl'); if(plbl&&t['infra-local-lbl']) plbl.textContent=t['infra-local-lbl'];
+      var imtitles = iv.querySelectorAll('.infra-machine-title');
+      if(imtitles[0]&&t['infra-mach-title']) imtitles[0].textContent=t['infra-mach-title'];
+      if(imtitles[1]&&t['infra-python-title']) imtitles[1].textContent=t['infra-python-title'];
+      var wbt = iv.querySelector('.wifi-banner-title'); if(wbt&&t['infra-wifi-title']) wbt.textContent=t['infra-wifi-title'];
+      var wbd = iv.querySelector('.wifi-banner-desc'); if(wbd&&t['infra-wifi-desc']) wbd.innerHTML=t['infra-wifi-desc'];
+      var stitle = iv.querySelector('.storage-title'); if(stitle&&t['infra-folder-title']) stitle.textContent=t['infra-folder-title'];
+      var sdesc = iv.querySelector('.storage-desc'); if(sdesc&&t['infra-folder-desc']) sdesc.textContent=t['infra-folder-desc'];
+      // libs
+      var libspans = iv.querySelectorAll('.infra-machine-body span[style*="font-size:10px"]');
+      var libkeys=['infra-lib-pw','infra-lib-st','infra-lib-fc','infra-lib-bm','infra-lib-ga','infra-lib-sq'];
+      libspans.forEach(function(s,i){ if(libkeys[i]&&t[libkeys[i]]) s.textContent=t[libkeys[i]]; });
+      // intelex card
+      var ict = iv.querySelector('.card-title'); if(ict&&t['infra-intelex-title']) ict.textContent=t['infra-intelex-title'];
+      var isteps = iv.querySelectorAll('.intelex-text');
+      if(isteps[0]&&t['infra-int-1']) isteps[0].innerHTML=t['infra-int-1'];
+      if(isteps[1]&&t['infra-int-2']) isteps[1].innerHTML=t['infra-int-2'];
+      if(isteps[2]&&t['infra-int-3']) isteps[2].innerHTML=t['infra-int-3'];
+      if(isteps[3]&&t['infra-int-4']) isteps[3].innerHTML=t['infra-int-4'];
+      // rag pipeline
+      var raglbl = iv.querySelector('.rag-pipeline-lbl'); if(raglbl&&t['infra-rag-lbl']) raglbl.textContent=t['infra-rag-lbl'];
+      var ragts = iv.querySelectorAll('.rag-step-title');
+      var ragds = iv.querySelectorAll('.rag-step-desc');
+      var ragtk=['infra-rag-s1-title','infra-rag-s2-title','infra-rag-s3-title','infra-rag-s4-title','infra-rag-s5-title'];
+      var ragdk=['infra-rag-s1-desc','infra-rag-s2-desc','infra-rag-s3-desc','infra-rag-s4-desc','infra-rag-s5-desc'];
+      ragts.forEach(function(el,i){ if(ragtk[i]&&t[ragtk[i]]) el.textContent=t[ragtk[i]]; });
+      ragds.forEach(function(el,i){ if(ragdk[i]&&t[ragdk[i]]) el.textContent=t[ragdk[i]]; });
+      // rag note
+      var ragnote = iv.querySelectorAll('[style*="sobreposição"], [style*="8.5px"]');
+      iv.querySelectorAll('.rag-step').forEach(function(rs){ var note=rs.querySelector('[style*="8.5px"]'); if(note&&t['infra-rag-s2-note']) note.textContent=t['infra-rag-s2-note']; });
+      // query flow
+      var qflbl = iv.querySelector('.query-flow-lbl'); if(qflbl&&t['infra-qf-lbl']) qflbl.textContent=t['infra-qf-lbl'];
+      var qfts = iv.querySelectorAll('.qf-step-title');
+      var qfds = iv.querySelectorAll('.qf-step-desc');
+      var qftk=['infra-qf-s1-title','infra-qf-s2-title','infra-qf-s3-title','infra-qf-s4-title','infra-qf-s5-title'];
+      var qfdk=['infra-qf-s1-desc','infra-qf-s2-desc','infra-qf-s3-desc','infra-qf-s4-desc','infra-qf-s5-desc'];
+      qfts.forEach(function(el,i){ if(qftk[i]&&t[qftk[i]]) el.textContent=t[qftk[i]]; });
+      qfds.forEach(function(el,i){ if(qfdk[i]&&t[qfdk[i]]) el.innerHTML=t[qfdk[i]]; });
+      var badge3 = iv.querySelector('.rrf-badge'); if(badge3&&t['infra-qf-s3-badge']) badge3.textContent=t['infra-qf-s3-badge'];
+      var iouttag = iv.querySelector('.out-tag'); if(iouttag&&t['infra-outtag']) iouttag.innerHTML=t['infra-outtag'];
+    }
+
+    // ── Gerencial view
+    var gv = document.getElementById('view-gerencial');
+    if (gv) {
+      gv.querySelector('.title h1').innerHTML = t['ger-h1'] || '';
+      gv.querySelector('.title p').textContent = t['ger-sub'] || '';
+      var sas = gv.querySelectorAll('.simple-analogy');
+      var sakeys=[['ger-b0-label','ger-b0-title','ger-b0-desc','ger-b0-tip'],
+                  ['ger-b1-label','ger-b1-title','ger-b1-desc','ger-b1-tip'],
+                  ['ger-b2-label','ger-b2-title','ger-b2-desc','ger-b2-tip'],
+                  ['ger-b3-label','ger-b3-title','ger-b3-desc','ger-b3-tip'],
+                  ['ger-b4-label','ger-b4-title','ger-b4-desc','ger-b4-tip']];
+      sas.forEach(function(sa,i){
+        if(!sakeys[i]) return;
+        var lbl=sa.querySelector('.sa-label'); if(lbl&&t[sakeys[i][0]]) lbl.textContent=t[sakeys[i][0]];
+        var tit=sa.querySelector('.sa-title'); if(tit&&t[sakeys[i][1]]) tit.innerHTML=t[sakeys[i][1]];
+        var dsc=sa.querySelector('.sa-desc');  if(dsc&&t[sakeys[i][2]]) dsc.innerHTML=t[sakeys[i][2]];
+        var tip=sa.querySelector('.sa-tip');   if(tip&&t[sakeys[i][3]]) tip.innerHTML=t[sakeys[i][3]];
+      });
+      var flowTitle = gv.querySelector('[style*="text-transform:uppercase"]'); if(flowTitle&&t['ger-flow-title']) flowTitle.textContent=t['ger-flow-title'];
+      var sfts = gv.querySelectorAll('.sf-title');
+      var sfds = gv.querySelectorAll('.sf-desc');
+      var sftk=['ger-f1-title','ger-f2-title','ger-f3-title','ger-f4-title','ger-f5-title'];
+      var sfdk=['ger-f1-desc','ger-f2-desc','ger-f3-desc','ger-f4-desc','ger-f5-desc'];
+      sfts.forEach(function(el,i){ if(sftk[i]&&t[sftk[i]]) el.textContent=t[sftk[i]]; });
+      sfds.forEach(function(el,i){ if(sfdk[i]&&t[sfdk[i]]) el.innerHTML=t[sfdk[i]]; });
+      var privTitle = gv.querySelector('.sp-title'); if(privTitle&&t['ger-privacy-title']) privTitle.textContent=t['ger-privacy-title'];
+      var privDesc  = gv.querySelector('.sp-desc');  if(privDesc&&t['ger-privacy-desc'])  privDesc.innerHTML=t['ger-privacy-desc'];
+    }
+
+    // ── Lang button highlight
+    ['pt','en','es'].forEach(function(l){
+      var btn = document.getElementById('lang-'+l);
+      btn.style.color = (l===lang) ? '#1d4ed8' : '#374151';
+      btn.style.borderBottom = (l===lang) ? '2px solid #1d4ed8' : '2px solid transparent';
+    });
+
+    setTimeout(function(){ slidePill(document.querySelector('.toggle-btn.active')); }, 50);
+  }
+
   window.addEventListener('load', function() {
     var active = document.querySelector('.toggle-btn.active');
     if (active) slidePill(active);
+    setLang('pt');
   });
 </script>
 
@@ -1345,7 +2141,7 @@
           <!-- Simplified lib grid with descriptions -->
           <div style="display:flex;flex-direction:column;gap:6px">
             <div style="display:flex;gap:8px;align-items:flex-start">
-              <span class="lib-tag core" style="flex-shrink:0;margin-top:1px">eel / flask</span>
+              <span class="lib-tag core" style="flex-shrink:0;margin-top:1px">pywebview</span>
               <span style="font-size:10px;color:#444;line-height:1.5">Cria a interface gráfica do chatbot no navegador</span>
             </div>
             <div style="display:flex;gap:8px;align-items:flex-start">
